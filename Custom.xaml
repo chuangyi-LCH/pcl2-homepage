@@ -1,0 +1,65 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:PCL2">
+
+    <!-- ===== 卡片1：欢迎横幅 ===== -->
+    <local:MyCard Title="欢迎" CanSwap="False">
+        <StackPanel Margin="10">
+            <TextBlock Text="欢迎回来" 
+                       FontSize="22" 
+                       FontWeight="Bold"
+                       Foreground="{DynamicResource ColorBrush6}" />
+            <TextBlock Text="这是你的专属启动器控制台" 
+                       FontSize="13"
+                       Foreground="{DynamicResource ColorBrush4}"
+                       Margin="0,5,0,0" />
+        </StackPanel>
+    </local:MyCard>
+
+    <!-- ===== 卡片2：服务器状态（核心功能） ===== -->
+    <local:MyCard Title="服务器状态" CanSwap="True" IsSwapped="False">
+        <StackPanel Margin="0,5,0,5">
+            <!-- 嵌入 status.html 显示实时人数 -->
+            <WebBrowser x:Name="ServerStatusBrowser"
+                        Source="https://你的托管地址/status.html"
+                        Height="120"
+                        Width="Auto"
+                        HorizontalAlignment="Stretch" />
+            <TextBlock Text="数据每60秒自动刷新" 
+                       FontSize="11"
+                       Foreground="{DynamicResource ColorBrush4}"
+                       Margin="0,5,0,0"
+                       HorizontalAlignment="Right" />
+        </StackPanel>
+    </local:MyCard>
+
+    <!-- ===== 卡片3：快捷导航 ===== -->
+    <local:MyCard Title="快速导航" CanSwap="True">
+        <WrapPanel Margin="0,5">
+            <local:MyButton Text="MC百科" 
+                            EventType="打开网页"
+                            EventData="https://www.mcmod.cn/"
+                            Width="100" Height="32" Margin="5" />
+            <local:MyButton Text="Modrinth" 
+                            EventType="打开网页"
+                            EventData="https://modrinth.com/"
+                            Width="100" Height="32" Margin="5" />
+            <local:MyButton Text="原版Wiki" 
+                            EventType="打开网页"
+                            EventData="https://zh.minecraft.wiki/"
+                            Width="100" Height="32" Margin="5" />
+            <local:MyButton Text="服务器官网" 
+                            EventType="打开网页"
+                            EventData="https://你的服务器官网/"
+                            Width="100" Height="32" Margin="5" />
+        </WrapPanel>
+    </local:MyCard>
+
+    <!-- ===== 卡片4：提示信息 ===== -->
+    <local:MyCard Title="提示" CanSwap="True">
+        <local:MyHint Text="点击卡片右上角的箭头可以折叠或展开各个板块。"
+                      FontSize="12" />
+    </local:MyCard>
+
+</ResourceDictionary>
