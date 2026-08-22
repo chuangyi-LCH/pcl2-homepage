@@ -1,0 +1,194 @@
+<local:MyCard xmlns:local="clr-namespace:PCL"
+              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Background="Transparent" Margin="0">
+    <Border Background="#F8FAFC"
+            CornerRadius="12"
+            BorderBrush="#E2E8F0"
+            BorderThickness="1"
+            Padding="20,16"
+            Margin="10,10,10,10">
+        <StackPanel>
+            <!-- 快捷入口标题 -->
+            <TextBlock Text="快捷入口"
+                       FontSize="18"
+                       FontWeight="SemiBold"
+                       Foreground="#1E293B"
+                       Margin="0,0,0,12" />
+
+            <!-- trademc.cc 官网按钮 -->
+            <Border Background="White"
+                    CornerRadius="10"
+                    BorderBrush="#E2E8F0"
+                    BorderThickness="1"
+                    Margin="0,0,0,10"
+                    Padding="12,10">
+                <StackPanel>
+                    <local:MyButton Height="42"
+                                    HorizontalAlignment="Stretch"
+                                    Padding="14,0"
+                                    ColorType="Highlight"
+                                    Text="trademc.cc 官网"
+                                    EventType="打开网页"
+                                    EventData="https://trademc.cc/"
+                                    ToolTip="将使用你的默认浏览器打开" />
+                    <TextBlock TextWrapping="Wrap"
+                               Margin="0,8,0,0"
+                               Foreground="#64748B"
+                               FontSize="12"
+                               Text="派系 宣战 夺地 在一张会改写的版图上写下你的国...（服务器关于内容 由于PCL安全策略，无法在启动器内直接显示）" />
+                </StackPanel>
+            </Border>
+
+            <!-- LittleSkin 官网按钮 -->
+            <Border Background="White"
+                    CornerRadius="10"
+                    BorderBrush="#E2E8F0"
+                    BorderThickness="1"
+                    Margin="0,0,0,10"
+                    Padding="12,10">
+                <StackPanel>
+                    <local:MyButton Height="42"
+                                    HorizontalAlignment="Stretch"
+                                    Padding="14,0"
+                                    ColorType="Highlight"
+                                    Text="LittleSkin 官网"
+                                    EventType="打开网页"
+                                    EventData="https://littleskin.cn/user"
+                                    ToolTip="将使用你的默认浏览器打开" />
+                    <TextBlock TextWrapping="Wrap"
+                               Margin="0,8,0,0"
+                               Foreground="#64748B"
+                               FontSize="12"
+                               Text="LittleSkin 是Minecraft 皮肤站 在此管理你的皮肤与角色登录" />
+                </StackPanel>
+            </Border>
+
+            <!-- 启动游戏按钮（修正 EventType） -->
+            <local:MyButton Margin="0,0,10,0" 
+                            Width="140" Height="40" 
+                            HorizontalAlignment="Center" 
+                            Padding="13,0,13,0" 
+                            ColorType="Highlight" 
+                            Text="服务器启动!!!" 
+                            EventType="启动游戏" 
+                            EventData="Tradecraft NEXT|trademc.cc" 
+                            ToolTip="请确保已下载服务器整合包Tradecraft NEXT" />
+
+            <!-- 分隔文字 -->
+            <TextBlock Text="—— 点击按钮即可跳转 ——"
+                       Foreground="#94A3B8"
+                       FontSize="11"
+                       HorizontalAlignment="Center"
+                       Margin="0,0,0,16" />
+
+            <!-- 消息卡片 -->
+            <local:MyCard Title="消息" Margin="0,0,0,15" CanSwap="True" IsSwaped="True">
+                <StackPanel Margin="25,40,23,15">
+                    <Border Background="White"
+                            CornerRadius="10"
+                            BorderBrush="#E2E8F0"
+                            BorderThickness="1"
+                            Margin="0,0,0,10"
+                            Padding="12,10">
+                        <StackPanel>
+                            <TextBlock Text="公告" FontWeight="Bold" FontSize="14" Foreground="#1E293B" />
+                            <TextBlock TextWrapping="Wrap" Foreground="#64748B" FontSize="12"
+                                       Text="欢迎大家上线发育参与测试！插件均在制作中，有想法也可以告诉我！
+版本 1.21.11地址 trademc.cc（备用mc.781391.cc）官网 trademc.cc
+QQ群：694372056（使用LittleSkin登录 否则没用!!!）" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </local:MyCard>
+
+            <!-- 下载卡片 -->
+            <local:MyCard Title="下载" Margin="0,0,0,15" CanSwap="True" IsSwaped="True">
+                <StackPanel Margin="25,40,23,15">
+                    <local:MyHint IsWarn="True" Text="链接必须为以http://或https://开头的网址，部分网址可能无法下载" />
+                    <StackPanel Orientation="Horizontal" Height="50" Width="800">
+                        <TextBlock Text="下载链接：" VerticalAlignment="Center" />
+                        <local:MyTextBox Margin="3" Name="web" Height="30" Width="600" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <local:MyButton EventType="下载文件" EventData="{Binding ElementName=web,Path=Text}" Text="开始下载" Margin="0,0,10,0" Width="140" Height="35" 
+HorizontalAlignment="Left" Padding="13,0,13,0" ColorType="Highlight" />
+                    </StackPanel>
+                </StackPanel>
+            </local:MyCard>
+
+            <!-- 主页制作卡片 -->
+            <local:MyCard Title="主页制作" Margin="0,0,0,15" CanSwap="True" IsSwaped="True">
+                <StackPanel Margin="25,40,23,15">
+                    <Border Background="White"
+                            CornerRadius="10"
+                            BorderBrush="#E2E8F0"
+                            BorderThickness="1"
+                            Margin="0,0,0,10"
+                            Padding="12,10">
+                        <StackPanel>
+                            <TextBlock Text="白糖" FontWeight="Bold" FontSize="14" Foreground="#1E293B" />
+                            <TextBlock TextWrapping="Wrap" Foreground="#64748B" FontSize="12"
+                                       Text="提供了主页" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Background="White"
+                            CornerRadius="10"
+                            BorderBrush="#E2E8F0"
+                            BorderThickness="1"
+                            Margin="0,0,0,10"
+                            Padding="12,10">
+                        <StackPanel>
+                            <TextBlock Text="创世" FontWeight="Bold" FontSize="14" Foreground="#1E293B" />
+                            <TextBlock TextWrapping="Wrap" Foreground="#64748B" FontSize="12"
+                                       Text="提供帮助和额... 打杂的" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Background="White"
+                            CornerRadius="10"
+                            BorderBrush="#E2E8F0"
+                            BorderThickness="1"
+                            Margin="0,0,0,10"
+                            Padding="12,10">
+                        <StackPanel>
+                            <TextBlock Text="howze" FontWeight="Bold" FontSize="14" Foreground="#1E293B" />
+                            <TextBlock TextWrapping="Wrap" Foreground="#64748B" FontSize="12"
+                                       Text="腐竹权威不多说" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Background="White"
+                            CornerRadius="10"
+                            BorderBrush="#E2E8F0"
+                            BorderThickness="1"
+                            Margin="0,0,0,0"
+                            Padding="12,10">
+                        <StackPanel>
+                            <TextBlock Text="deepseek" FontWeight="Bold" FontSize="14" Foreground="#1E293B" />
+                            <TextBlock TextWrapping="Wrap" Foreground="#64748B" FontSize="12"
+                                       Text="帮助老白糖修改语法（实例:您的 XAML 文件存在明显的结构错误，导致无法正常解析错误原因是 XAML 结构严重错乱 文件中出现了多个根级元素，且存在未闭合的标签）" />
+                            <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                <local:MyButton Height="28"
+                                                HorizontalAlignment="Left"
+                                                Padding="10,0"
+                                                ColorType="Highlight"
+                                                Text="打开官网"
+                                                EventType="打开网页"
+                                                EventData="https://chat.deepseek.com/"
+                                                ToolTip="访问" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </local:MyCard>
+        </StackPanel>
+    </Border>
+</local:MyCard>
+<!--
+作者: Reverse
+链接: https://blog.c12th.cn/archives/34.html
+来源: Reverse
+感谢
+-->
