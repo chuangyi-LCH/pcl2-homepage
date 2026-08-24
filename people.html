@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>服务器状态</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Microsoft YaHei', 'PingFang SC', 'Segoe UI', sans-serif;
+            background: transparent;
+            padding: 0;
+            margin: 0;
+        }
+        .status-card {
+            background: linear-gradient(135deg, rgba(20,25,35,0.92) 0%, rgba(30,35,50,0.88) 100%);
+            border-radius: 14px;
+            padding: 20px 24px 18px 24px;
+            border: 1px solid rgba(255,255,255,0.06);
+            backdrop-filter: blur(6px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+            position: relative;
+            overflow: hidden;
+        }
+        .status-card::before {
+            content: '';
+            position: absolute;
+            top: -60%;
+            right: -20%;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(100,200,255,0.06) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding-bottom: 10px;
+        }
+        .header-title .title-text {
+            font-size: 15px;
+            font-weight: 600;
+            color: #e8edf5;
+            letter-spacing: 0.5px;
+        }
+        .header-title .title-text span {
+            color: rgba(255,255,255,0.3);
+            font-weight: 300;
+        }
+        .header-badge {
+            font-size: 11px;
+            color: rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.05);
+            padding: 3px 12px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.04);
+            letter-spacing: 0.3px;
+        }
+        .card-body {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .status-section {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+        .status-dot.online {
+            background: #4ade80;
+            box-shadow: 0 0 14px rgba(74,222,128,0.4);
+            animation: pulse-green 2s ease-in-out infinite;
+        }
+        .status-dot.offline {
+            background: #f87171;
+            box-shadow: 0 0 14px rgba(248,113,113,0.3);
+        }
+        .status-dot.loading {
+            background: #facc15;
+            box-shadow: 0 0 14px rgba(250,204,21,0.3);
+            animation: pulse-yellow 1s ease-in-out infinite;
+        }
+        @keyframes pulse-green {
+            0%, 100% { box-shadow: 0 0 14px rgba(74,222,128,0.4); }
+            50% { box-shadow: 0 0 24px rgba(74,222,128,0.7); }
+        }
+        @keyframes pulse-yellow {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.9); }
+        }
+        .status-label {
+            font-size: 16px;
+            font-weight: 500;
+            color: #e8edf5;
+            letter-spacing: 0.3px;
+        }
+        .status-label.online { color: #4ade80; }
+        .status-label.offline { color: #f87171; }
+        .status-label.loading { color: #facc15; }
+        .player-count-section {
+            display: flex;
+            align-items: baseline;
+            gap: 4px;
+            padding-left: 16px;
+            border-left: 1px solid rgba(255,255,255,0.08);
+        }
+        .player-count-number {
+            font-size: 32px;
+            font-weight: 700;
+            color: #ffffff;
+            line-height: 1;
+            letter-spacing: -0.5px;
+        }
+        .player-count-number.online { color: #4ade80; }
+        .player-count-number.offline { color: #f87171; }
+        .player-count-divider {
+            font-size: 18px;
+            color: rgba(255,255,255,0.2);
+            font-weight: 300;
+            margin: 0 2px;
+        }
+        .player-count-max {
+            font-size: 18px;
+            color: rgba(255,255,255,0.3);
+            font-weight: 300;
+        }
+        .info-section {
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 2px;
+        }
+        .server-version {
+            font-size: 13px;
+            color: rgba(255,255,255,0.4);
+            font-weight: 400;
+            letter-spacing: 0.3px;
+        }
+        .server-version .label {
+            color: rgba(255,255,255,0.2);
+        }
+        .server-description {
+            font-size: 13px;
+            color: rgba(255,255,255,0.25);
+            font-weight: 300;
+            font-style: italic;
+            letter-spacing: 0.2px;
+        }
+        .server-description .empty {
+            color: rgba(255,255,255,0.12);
+        }
+        .card-footer {
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255,255,255,0.04);
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+        }
+        .refresh-tip {
+            font-size: 11px;
+            color: rgba(255,255,255,0.15);
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+        }
+        @media (max-width: 600px) {
+            .status-card { padding: 16px; }
+            .card-body { flex-direction: column; align-items: stretch; gap: 10px; }
+            .info-section { text-align: left; align-items: flex-start; }
+            .status-section { flex-wrap: wrap; }
+            .player-count-section { padding-left: 10px; }
+            .player-count-number { font-size: 26px; }
+            .card-footer { justify-content: flex-start; }
+            .header-title .title-text { font-size: 13px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="status-card">
+        <div class="card-header">
+            <div class="header-title">
+                <span class="title-text">此刻，谁在<span>版图上</span></span>
+            </div>
+            <span class="header-badge">LIVE</span>
+        </div>
+        <div class="card-body">
+            <div class="status-section">
+                <div class="status-indicator">
+                    <span class="status-dot loading" id="statusDot"></span>
+                    <span class="status-label loading" id="statusLabel">查询中...</span>
+                </div>
+                <div class="player-count-section">
+                    <span class="player-count-number" id="playerCount">--</span>
+                    <span class="player-count-divider">/</span>
+                    <span class="player-count-max" id="playerMax">--</span>
+                </div>
+            </div>
+            <div class="info-section">
+                <div class="server-version">
+                    <span class="label">版本</span>
+                    <span id="serverVersion">--</span>
+                </div>
+                <div class="server-description">
+                    <span id="serverDescription">加载中...</span>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <div class="refresh-tip">每 60 秒刷新</div>
+        </div>
+    </div>
+    <script>
+        // ============================================================
+        //  ⚙️ 配置区 —— 修改为你自己的服务器地址
+        // ============================================================
+        const SERVER_IP = 'trademc.cc';   // 默认已填入你的服务器，可自行修改
+
+        //
