@@ -79,7 +79,7 @@
                                 ColorType="Highlight" 
                                 Text="在线人数" 
                                 EventType="打开网页" 
-                                EventData="https://trademc.cc/" 
+                                EventData="https://pcl2-homepage.pages.dev/people.html" 
                                 ToolTip="在默认浏览器中打开人数查询" />
             </StackPanel>
 
