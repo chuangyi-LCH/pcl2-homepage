@@ -64,16 +64,24 @@
                 </StackPanel>
             </Border>
 
-            <!-- 启动游戏按钮（修正 EventType） -->
-            <local:MyButton Margin="0,0,10,0" 
-                            Width="140" Height="40" 
-                            HorizontalAlignment="Center" 
-                            Padding="13,0,13,0" 
-                            ColorType="Highlight" 
-                            Text="服务器启动!!!" 
-                            EventType="启动游戏" 
-                            EventData="Tradecraft NEXT|trademc.cc" 
-                            ToolTip="请确保已下载服务器整合包Tradecraft NEXT" />
+            <!-- 启动游戏 -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,8,0,8">
+                <local:MyButton Width="140" Height="40" 
+                                Padding="13,0,13,0" 
+                                ColorType="Highlight" 
+                                Text="服务器启动!!!" 
+                                EventType="启动游戏" 
+                                EventData="Tradecraft NEXT|trademc.cc" 
+                                ToolTip="请确保已下载服务器整合包Tradecraft NEXT" />
+                <local:MyButton Width="140" Height="40" 
+                                Margin="10,0,0,0"
+                                Padding="13,0,13,0" 
+                                ColorType="Highlight" 
+                                Text="在线人数" 
+                                EventType="打开网页" 
+                                EventData="https://trademc.cc/" 
+                                ToolTip="在默认浏览器中打开人数查询" />
+            </StackPanel>
 
             <!-- 分隔文字 -->
             <TextBlock Text="—— 点击按钮即可跳转 ——"
@@ -187,7 +195,7 @@ HorizontalAlignment="Left" Padding="13,0,13,0" ColorType="Highlight" />
     </Border>
 </local:MyCard>
 <!--
-作者: Reverse
+下载页面作者: Reverse
 链接: https://blog.c12th.cn/archives/34.html
 来源: Reverse
 感谢
