@@ -64,7 +64,17 @@
                 </StackPanel>
             </Border>
 
-            <!-- 启动游戏 -->
+            <!-- 启动游戏按钮（修正 EventType） -->
+            <local:MyButton Margin="0,0,10,0" 
+                            Width="140" Height="40" 
+                            HorizontalAlignment="Center" 
+                            Padding="13,0,13,0" 
+                            ColorType="Highlight" 
+                            Text="服务器启动!!!" 
+                            EventType="启动游戏" 
+                            EventData="Tradecraft NEXT|trademc.cc" 
+                            ToolTip="请确保已下载服务器整合包Tradecraft NEXT" />
+  <!-- 启动游戏 -->
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,8,0,8">
                 <local:MyButton Width="140" Height="40" 
                                 Padding="13,0,13,0" 
@@ -82,7 +92,6 @@
                                 EventData="https://pcl2-homepage.pages.dev/people.html" 
                                 ToolTip="在默认浏览器中打开人数查询" />
             </StackPanel>
-
             <!-- 分隔文字 -->
             <TextBlock Text="—— 点击按钮即可跳转 ——"
                        Foreground="#94A3B8"
@@ -100,7 +109,7 @@
                             Margin="0,0,0,10"
                             Padding="12,10">
                         <StackPanel>
-                            <<TextBlock Text="公告" FontWeight="Bold" FontSize="14" Foreground="#1E293B" />
+                            <TextBlock Text="公告" FontWeight="Bold" FontSize="14" Foreground="#1E293B" />
                             <TextBlock TextWrapping="Wrap" Foreground="#64748B" FontSize="12"
                                        Text="在进入服务器游玩之前请先看完这则公告
 进群之后请先将你的群昵称改成游戏昵称，服务器需要使用littleskin皮肤站登录（没有的请先去littleskin.cn创建一个账号）
@@ -112,7 +121,9 @@
 /menu 主菜单（正常安装服务器模组后按R可以打开）
 /k 王国系统根指令，输入/k也可以直接查看指令帮助内容
 /craftlist 大陆传送菜单（在menu菜单内也可以找到）
-QQ群：694372056（使用LittleSkin登录 否则没用!!!）" />
+QQ群：694372056（使用LittleSkin登录 否则没用!!!）
+  " />
+
                             <TextBlock Text="寒假之前安排" FontWeight="Bold" FontSize="14" Foreground="#1E293B" />
                             <TextBlock TextWrapping="Wrap" Foreground="#64748B" FontSize="12"
                                        Text="从8月31号开始物服和地服要上学去了，10月之后地服两周回来一次，腐竹一周回来一次，中间拿不到手机，服务器炸了就等等，周末腐竹能处理自然会处理，腐竹不能处理就等地服处理" />
@@ -206,7 +217,7 @@ HorizontalAlignment="Left" Padding="13,0,13,0" ColorType="Highlight" />
     </Border>
 </local:MyCard>
 <!--
-下载页面作者: Reverse
+作者: Reverse
 链接: https://blog.c12th.cn/archives/34.html
 来源: Reverse
 感谢
