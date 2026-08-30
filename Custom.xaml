@@ -100,11 +100,24 @@
                             Margin="0,0,0,10"
                             Padding="12,10">
                         <StackPanel>
-                            <TextBlock Text="公告" FontWeight="Bold" FontSize="14" Foreground="#1E293B" />
+                            <<TextBlock Text="公告" FontWeight="Bold" FontSize="14" Foreground="#1E293B" />
                             <TextBlock TextWrapping="Wrap" Foreground="#64748B" FontSize="12"
-                                       Text="欢迎大家上线发育参与测试！插件均在制作中，有想法也可以告诉我！
-版本 1.21.11地址 trademc.cc（备用mc.781391.cc）官网 trademc.cc
-QQ群：694372056（使用LittleSkin登录 否则没用!!!）" />
+                                       Text="在进入服务器游玩之前请先看完这则公告
+进群之后请先将你的群昵称改成游戏昵称，服务器需要使用littleskin皮肤站登录（没有的请先去littleskin.cn创建一个账号）
+群文件里有服务器整合包，内涵服务器模组 服务器模组仅支持1.21.8和1.21.11两个版本 以及fabric和neoforge两个加载器，如需模组也可以在群文件自取
+服务器的地址是trademc.cc
+服务器暂未制作完善，也还没有制作新手教程，进服可以找老玩家带，有什么不会的也可以在群里问
+有什么意见都可以在群里提出，遇到bug也请及时报告，管理看到都会回复
+————常用指令————
+/menu 主菜单（正常安装服务器模组后按R可以打开）
+/k 王国系统根指令，输入/k也可以直接查看指令帮助内容
+/craftlist 大陆传送菜单（在menu菜单内也可以找到）
+QQ群：694372056（使用LittleSkin登录 否则没用!!!）
+  " />
+
+                            <TextBlock Text="寒假之前安排" FontWeight="Bold" FontSize="14" Foreground="#1E293B" />
+                            <TextBlock TextWrapping="Wrap" Foreground="#64748B" FontSize="12"
+                                       Text="从8月31号开始物服和地服要上学去了，10月之后地服两周回来一次，腐竹一周回来一次，中间拿不到手机，服务器炸了就等等，周末腐竹能处理自然会处理，腐竹不能处理就等地服处理" />
                         </StackPanel>
                     </Border>
                 </StackPanel>
