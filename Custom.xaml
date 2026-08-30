@@ -64,7 +64,7 @@
                 </StackPanel>
             </Border>
 
-            <!-- 启动游戏按钮（修正 EventType） -->
+            <!-- 启动游戏按钮 -->
             <local:MyButton Margin="0,0,10,0" 
                             Width="140" Height="40" 
                             HorizontalAlignment="Center" 
@@ -100,14 +100,13 @@
 服务器的地址是trademc.cc
 服务器暂未制作完善，也还没有制作新手教程，进服可以找老玩家带，有什么不会的也可以在群里问
 有什么意见都可以在群里提出，遇到bug也请及时报告，管理看到都会回复
-————常用指令————
 /menu 主菜单（正常安装服务器模组后按R可以打开）
 /k 王国系统根指令，输入/k也可以直接查看指令帮助内容
 /craftlist 大陆传送菜单（在menu菜单内也可以找到）
 QQ群：694372056（使用LittleSkin登录 否则没用!!!）
   " />
-
-                            <TextBlock Text="寒假之前安排" FontWeight="Bold" FontSize="14" Foreground="#1E293B" />
+                            <!-- 以下为“寒假之前安排”，直接放在同一个 StackPanel 中，删除了多余的 <StackPanel> -->
+                            <TextBlock Text="寒假之前安排" FontWeight="Bold" FontSize="14" Foreground="#1E293B" Margin="0,12,0,0" />
                             <TextBlock TextWrapping="Wrap" Foreground="#64748B" FontSize="12"
                                        Text="从8月31号开始物服和地服要上学去了，10月之后地服两周回来一次，腐竹一周回来一次，中间拿不到手机，服务器炸了就等等，周末腐竹能处理自然会处理，腐竹不能处理就等地服处理" />
                         </StackPanel>
@@ -196,12 +195,10 @@ HorizontalAlignment="Left" Padding="13,0,13,0" ColorType="Highlight" />
                     </Border>
                 </StackPanel>
             </local:MyCard>
+
+            <!-- 作者信息（原外部注释移入内部） -->
+            <TextBlock Text="作者: Reverse | 链接: https://blog.c12th.cn/archives/34.html"
+                       Foreground="#94A3B8" FontSize="10" HorizontalAlignment="Center" Margin="0,10,0,0" />
         </StackPanel>
     </Border>
 </local:MyCard>
-<!--
-作者: Reverse
-链接: https://blog.c12th.cn/archives/34.html
-来源: Reverse
-感谢
--->
