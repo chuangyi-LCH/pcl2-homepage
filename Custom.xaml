@@ -112,9 +112,7 @@
 /menu 主菜单（正常安装服务器模组后按R可以打开）
 /k 王国系统根指令，输入/k也可以直接查看指令帮助内容
 /craftlist 大陆传送菜单（在menu菜单内也可以找到）
-QQ群：694372056（使用LittleSkin登录 否则没用!!!）
-  " />
-
+QQ群：694372056（使用LittleSkin登录 否则没用!!!）" />
                             <TextBlock Text="寒假之前安排" FontWeight="Bold" FontSize="14" Foreground="#1E293B" />
                             <TextBlock TextWrapping="Wrap" Foreground="#64748B" FontSize="12"
                                        Text="从8月31号开始物服和地服要上学去了，10月之后地服两周回来一次，腐竹一周回来一次，中间拿不到手机，服务器炸了就等等，周末腐竹能处理自然会处理，腐竹不能处理就等地服处理" />
