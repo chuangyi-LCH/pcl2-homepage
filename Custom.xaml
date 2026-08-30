@@ -1,35 +1,207 @@
-                    <边界 背景="白色"
-                            角半径="10"
-                            边境刷="#E2E8F0"
-                            边界厚度="1"
-                            边缘="0,0,0,0"
-                            填充="12,10">
-                        <堆栈面板>
-                            <文本块 正文="深寻" 字体粗大="加粗" 字体大小="14" 前景="#1E293B" />
-                            <文本块 文本换装="包裹" 前景="#64748B" 字体大小="12"
-                                       正文="帮助老白糖修改语法（实例：您的 XAML 文件存在明显的结构错误，导致无法正常解析错误原因是 XAML 结构严重错乱 文件中出现了多个根级元素，且存在未闭合的标签）" />
-                            <堆栈面板 方向="水平" 边缘="0,4,0,0">
-                                <本地:我的按钮 高度="28"
-                                                水平对齐="左"
-                                                填充="10,0"
-                                                色彩类型="亮点"
-                                                正文="打开官网"
-                                                事件类型="打开网页"
-                                                事件数据="https://chat.deepseek.com/"
-                                                提示="访问" />
-                            </堆栈面板>
-                        </堆栈面板>
-                    </边界>
-                </堆栈面板>
-            </本地:我的卡片>
-3分钟前
+<local:MyCard xmlns:local="clr-namespace:PCL"
+              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Background="Transparent" Margin="0">
+    <Border Background="#F8FAFC"
+            CornerRadius="12"
+            BorderBrush="#E2E8F0"
+            BorderThickness="1"
+            Padding="20,16"
+            Margin="10,10,10,10">
+        <StackPanel>
+            <!-- 快捷入口标题 -->
+            <TextBlock Text="快捷入口"
+                       FontSize="18"
+                       FontWeight="SemiBold"
+                       Foreground="#1E293B"
+                       Margin="0,0,0,12" />
 
-更新 Custom.xaml
-            <!--作者信息（原外部注释移入内部）-->
-            <文本块 正文="作者：反转 |链接： https://blog.c12th.cn/archives/34.html"
-                       前景="#94A3B8" 字体大小="10" 水平对齐="中心" 边缘="0,10,0,0" />
-上周
+            <!-- trademc.cc 官网按钮 -->
+            <Border Background="White"
+                    CornerRadius="10"
+                    BorderBrush="#E2E8F0"
+                    BorderThickness="1"
+                    Margin="0,0,0,10"
+                    Padding="12,10">
+                <StackPanel>
+                    <local:MyButton Height="42"
+                                    HorizontalAlignment="Stretch"
+                                    Padding="14,0"
+                                    ColorType="Highlight"
+                                    Text="trademc.cc 官网"
+                                    EventType="打开网页"
+                                    EventData="https://trademc.cc/"
+                                    ToolTip="将使用你的默认浏览器打开" />
+                    <TextBlock TextWrapping="Wrap"
+                               Margin="0,8,0,0"
+                               Foreground="#64748B"
+                               FontSize="12"
+                               Text="派系 宣战 夺地 在一张会改写的版图上写下你的国...（服务器关于内容 由于PCL安全策略，无法在启动器内直接显示）" />
+                </StackPanel>
+            </Border>
 
-通过上传添加文件
-        </堆栈面板>
-    </边界>
+            <!-- LittleSkin 官网按钮 -->
+            <Border Background="White"
+                    CornerRadius="10"
+                    BorderBrush="#E2E8F0"
+                    BorderThickness="1"
+                    Margin="0,0,0,10"
+                    Padding="12,10">
+                <StackPanel>
+                    <local:MyButton Height="42"
+                                    HorizontalAlignment="Stretch"
+                                    Padding="14,0"
+                                    ColorType="Highlight"
+                                    Text="LittleSkin 官网"
+                                    EventType="打开网页"
+                                    EventData="https://littleskin.cn/user"
+                                    ToolTip="将使用你的默认浏览器打开" />
+                    <TextBlock TextWrapping="Wrap"
+                               Margin="0,8,0,0"
+                               Foreground="#64748B"
+                               FontSize="12"
+                               Text="LittleSkin 是Minecraft 皮肤站 在此管理你的皮肤与角色登录" />
+                </StackPanel>
+            </Border>
+
+            <!-- 启动游戏按钮（修正 EventType） -->
+            <local:MyButton Margin="0,0,10,0" 
+                            Width="140" Height="40" 
+                            HorizontalAlignment="Center" 
+                            Padding="13,0,13,0" 
+                            ColorType="Highlight" 
+                            Text="服务器启动!!!" 
+                            EventType="启动游戏" 
+                            EventData="Tradecraft NEXT|trademc.cc" 
+                            ToolTip="请确保已下载服务器整合包Tradecraft NEXT" />
+
+            <!-- 分隔文字 -->
+            <TextBlock Text="—— 点击按钮即可跳转 ——"
+                       Foreground="#94A3B8"
+                       FontSize="11"
+                       HorizontalAlignment="Center"
+                       Margin="0,0,0,16" />
+
+            <!-- 消息卡片 -->
+            <local:MyCard Title="消息" Margin="0,0,0,15" CanSwap="True" IsSwaped="True">
+                <StackPanel Margin="25,40,23,15">
+                    <Border Background="White"
+                            CornerRadius="10"
+                            BorderBrush="#E2E8F0"
+                            BorderThickness="1"
+                            Margin="0,0,0,10"
+                            Padding="12,10">
+                        <StackPanel>
+                            <TextBlock Text="公告" FontWeight="Bold" FontSize="14" Foreground="#1E293B" />
+                            <TextBlock TextWrapping="Wrap" Foreground="#64748B" FontSize="12"
+                                       Text="在进入服务器游玩之前请先看完这则公告
+进群之后请先将你的群昵称改成游戏昵称，服务器需要使用littleskin皮肤站登录（没有的请先去littleskin.cn创建一个账号）
+群文件里有服务器整合包，内涵服务器模组 服务器模组仅支持1.21.8和1.21.11两个版本 以及fabric和neoforge两个加载器，如需模组也可以在群文件自取
+服务器的地址是trademc.cc
+服务器暂未制作完善，也还没有制作新手教程，进服可以找老玩家带，有什么不会的也可以在群里问
+有什么意见都可以在群里提出，遇到bug也请及时报告，管理看到都会回复
+————常用指令————
+/menu 主菜单（正常安装服务器模组后按R可以打开）
+/k 王国系统根指令，输入/k也可以直接查看指令帮助内容
+/craftlist 大陆传送菜单（在menu菜单内也可以找到）
+QQ群：694372056（使用LittleSkin登录 否则没用!!!）
+  " />
+
+                            <TextBlock Text="寒假之前安排" FontWeight="Bold" FontSize="14" Foreground="#1E293B" />
+                            <TextBlock TextWrapping="Wrap" Foreground="#64748B" FontSize="12"
+                                       Text="从8月31号开始物服和地服要上学去了，10月之后地服两周回来一次，腐竹一周回来一次，中间拿不到手机，服务器炸了就等等，周末腐竹能处理自然会处理，腐竹不能处理就等地服处理" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </local:MyCard>
+
+            <!-- 下载卡片 -->
+            <local:MyCard Title="下载" Margin="0,0,0,15" CanSwap="True" IsSwaped="True">
+                <StackPanel Margin="25,40,23,15">
+                    <local:MyHint IsWarn="True" Text="链接必须为以http://或https://开头的网址，部分网址可能无法下载" />
+                    <StackPanel Orientation="Horizontal" Height="50" Width="800">
+                        <TextBlock Text="下载链接：" VerticalAlignment="Center" />
+                        <local:MyTextBox Margin="3" Name="web" Height="30" Width="600" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <local:MyButton EventType="下载文件" EventData="{Binding ElementName=web,Path=Text}" Text="开始下载" Margin="0,0,10,0" Width="140" Height="35" 
+HorizontalAlignment="Left" Padding="13,0,13,0" ColorType="Highlight" />
+                    </StackPanel>
+                </StackPanel>
+            </local:MyCard>
+
+            <!-- 主页制作卡片 -->
+            <local:MyCard Title="主页制作" Margin="0,0,0,15" CanSwap="True" IsSwaped="True">
+                <StackPanel Margin="25,40,23,15">
+                    <Border Background="White"
+                            CornerRadius="10"
+                            BorderBrush="#E2E8F0"
+                            BorderThickness="1"
+                            Margin="0,0,0,10"
+                            Padding="12,10">
+                        <StackPanel>
+                            <TextBlock Text="白糖" FontWeight="Bold" FontSize="14" Foreground="#1E293B" />
+                            <TextBlock TextWrapping="Wrap" Foreground="#64748B" FontSize="12"
+                                       Text="提供了主页" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Background="White"
+                            CornerRadius="10"
+                            BorderBrush="#E2E8F0"
+                            BorderThickness="1"
+                            Margin="0,0,0,10"
+                            Padding="12,10">
+                        <StackPanel>
+                            <TextBlock Text="创世" FontWeight="Bold" FontSize="14" Foreground="#1E293B" />
+                            <TextBlock TextWrapping="Wrap" Foreground="#64748B" FontSize="12"
+                                       Text="提供帮助和额... 打杂的" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Background="White"
+                            CornerRadius="10"
+                            BorderBrush="#E2E8F0"
+                            BorderThickness="1"
+                            Margin="0,0,0,10"
+                            Padding="12,10">
+                        <StackPanel>
+                            <TextBlock Text="howze" FontWeight="Bold" FontSize="14" Foreground="#1E293B" />
+                            <TextBlock TextWrapping="Wrap" Foreground="#64748B" FontSize="12"
+                                       Text="腐竹权威不多说" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Background="White"
+                            CornerRadius="10"
+                            BorderBrush="#E2E8F0"
+                            BorderThickness="1"
+                            Margin="0,0,0,0"
+                            Padding="12,10">
+                        <StackPanel>
+                            <TextBlock Text="deepseek" FontWeight="Bold" FontSize="14" Foreground="#1E293B" />
+                            <TextBlock TextWrapping="Wrap" Foreground="#64748B" FontSize="12"
+                                       Text="帮助老白糖修改语法（实例:您的 XAML 文件存在明显的结构错误，导致无法正常解析错误原因是 XAML 结构严重错乱 文件中出现了多个根级元素，且存在未闭合的标签）" />
+                            <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                <local:MyButton Height="28"
+                                                HorizontalAlignment="Left"
+                                                Padding="10,0"
+                                                ColorType="Highlight"
+                                                Text="打开官网"
+                                                EventType="打开网页"
+                                                EventData="https://chat.deepseek.com/"
+                                                ToolTip="访问" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </local:MyCard>
+        </StackPanel>
+    </Border>
+</local:MyCard>
+<!--
+作者: Reverse
+链接: https://blog.c12th.cn/archives/34.html
+来源: Reverse
+感谢
+-->
