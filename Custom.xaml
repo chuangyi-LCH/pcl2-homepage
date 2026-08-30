@@ -195,5 +195,6 @@ HorizontalAlignment="Left" Padding="13,0,13,0" ColorType="Highlight" />
                     </Border>
                 </StackPanel>
             </local:MyCard>
-
-          
+        </StackPanel>
+    </Border>
+</local:MyCard>
