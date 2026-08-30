@@ -9,14 +9,14 @@
             Padding="20,16"
             Margin="10,10,10,10">
         <StackPanel>
-            <!-- 快捷入口标题 -->
+            <!-- 标题 -->
             <TextBlock Text="快捷入口"
                        FontSize="18"
                        FontWeight="SemiBold"
                        Foreground="#1E293B"
                        Margin="0,0,0,12" />
 
-            <!-- trademc.cc 官网按钮 -->
+            <!-- trademc.cc -->
             <Border Background="White"
                     CornerRadius="10"
                     BorderBrush="#E2E8F0"
@@ -40,7 +40,7 @@
                 </StackPanel>
             </Border>
 
-            <!-- LittleSkin 官网按钮 -->
+            <!-- LittleSkin 官网 -->
             <Border Background="White"
                     CornerRadius="10"
                     BorderBrush="#E2E8F0"
@@ -64,7 +64,7 @@
                 </StackPanel>
             </Border>
 
-            <!-- 启动游戏按钮 -->
+            <!-- 启动游戏 -->
             <local:MyButton Margin="0,0,10,0" 
                             Width="140" Height="40" 
                             HorizontalAlignment="Center" 
@@ -75,14 +75,14 @@
                             EventData="Tradecraft NEXT|trademc.cc" 
                             ToolTip="请确保已下载服务器整合包Tradecraft NEXT" />
 
-            <!-- 分隔文字 -->
+
             <TextBlock Text="—— 点击按钮即可跳转 ——"
                        Foreground="#94A3B8"
                        FontSize="11"
                        HorizontalAlignment="Center"
                        Margin="0,0,0,16" />
 
-            <!-- 消息卡片 -->
+            <!-- 消息 -->
             <local:MyCard Title="消息" Margin="0,0,0,15" CanSwap="True" IsSwaped="True">
                 <StackPanel Margin="25,40,23,15">
                     <Border Background="White"
@@ -105,7 +105,7 @@
 /craftlist 大陆传送菜单（在menu菜单内也可以找到）
 QQ群：694372056（使用LittleSkin登录 否则没用!!!）
   " />
-                            <!-- 以下为“寒假之前安排”，直接放在同一个 StackPanel 中，删除了多余的 <StackPanel> -->
+
                             <TextBlock Text="寒假之前安排" FontWeight="Bold" FontSize="14" Foreground="#1E293B" Margin="0,12,0,0" />
                             <TextBlock TextWrapping="Wrap" Foreground="#64748B" FontSize="12"
                                        Text="从8月31号开始物服和地服要上学去了，10月之后地服两周回来一次，腐竹一周回来一次，中间拿不到手机，服务器炸了就等等，周末腐竹能处理自然会处理，腐竹不能处理就等地服处理" />
@@ -114,7 +114,7 @@ QQ群：694372056（使用LittleSkin登录 否则没用!!!）
                 </StackPanel>
             </local:MyCard>
 
-            <!-- 下载卡片 -->
+            <!-- 下载卡片作者: Reverse | 链接: https://blog.c12th.cn/archives/34.html -->
             <local:MyCard Title="下载" Margin="0,0,0,15" CanSwap="True" IsSwaped="True">
                 <StackPanel Margin="25,40,23,15">
                     <local:MyHint IsWarn="True" Text="链接必须为以http://或https://开头的网址，部分网址可能无法下载" />
@@ -196,9 +196,4 @@ HorizontalAlignment="Left" Padding="13,0,13,0" ColorType="Highlight" />
                 </StackPanel>
             </local:MyCard>
 
-            <!-- 作者信息（原外部注释移入内部） -->
-            <TextBlock Text="作者: Reverse | 链接: https://blog.c12th.cn/archives/34.html"
-                       Foreground="#94A3B8" FontSize="10" HorizontalAlignment="Center" Margin="0,10,0,0" />
-        </StackPanel>
-    </Border>
-</local:MyCard>
+          
