@@ -75,7 +75,6 @@
                             EventData="Tradecraft NEXT|trademc.cc" 
                             ToolTip="请确保已下载服务器整合包Tradecraft NEXT" />
 
-
             <TextBlock Text="—— 点击按钮即可跳转 ——"
                        Foreground="#94A3B8"
                        FontSize="11"
@@ -117,18 +116,106 @@ QQ群：694372056（使用LittleSkin登录 否则没用!!!）
             <!-- 下载卡片作者: Reverse | 链接: https://blog.c12th.cn/archives/34.html -->
             <local:MyCard Title="下载" Margin="0,0,0,15" CanSwap="True" IsSwaped="True">
                 <StackPanel Margin="25,40,23,15">
-                    <local:MyHint IsWarn="True" Text="链接必须为以http://或https://开头的网址，部分网址可能无法下载" />
+                    <local:MyButton Height="42"
+                                    HorizontalAlignment="Stretch"
+                                    Padding="14,0"
+                                    ColorType="Highlight"
+                                    Text="下载官方内容"
+                                    EventType="打开网页"
+                                    EventData="https://trademc.cc/#download"
+                                    ToolTip="将使用你的默认浏览器打开" />
+
+                    <TextBlock TextWrapping="Wrap"
+                               Margin="0,8,0,0"
+                               Foreground="#64748B"
+                               FontSize="12"
+                               Text="下载整合包或专用模组" />
+
+                    <local:MyHint IsWarn="True"
+                                  Text="链接必须为以http://或https://开头的网址，部分网址可能无法下载" />
+
                     <StackPanel Orientation="Horizontal" Height="50" Width="800">
                         <TextBlock Text="下载链接：" VerticalAlignment="Center" />
                         <local:MyTextBox Margin="3" Name="web" Height="30" Width="600" />
                     </StackPanel>
+
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                        <local:MyButton EventType="下载文件" EventData="{Binding ElementName=web,Path=Text}" Text="开始下载" Margin="0,0,10,0" Width="140" Height="35" 
-HorizontalAlignment="Left" Padding="13,0,13,0" ColorType="Highlight" />
+                        <local:MyButton EventType="下载文件"
+                                        EventData="{Binding ElementName=web,Path=Text}"
+                                        Text="开始下载"
+                                        Margin="0,0,10,0"
+                                        Width="140"
+                                        Height="35"
+                                        HorizontalAlignment="Left"
+                                        Padding="13,0,13,0"
+                                        ColorType="Highlight" />
                     </StackPanel>
                 </StackPanel>
             </local:MyCard>
 
+            <!-- 常见没用的问题 -->
+            <local:MyCard Title="常见问题" Margin="0,0,0,15" CanSwap="True" IsSwaped="True">
+                <StackPanel Margin="25,40,23,15">
+                    <Border Background="White" CornerRadius="10" BorderBrush="#E2E8F0" BorderThickness="1" Margin="0,0,0,10" Padding="12,10">
+                        <StackPanel>
+                            <TextBlock Text="Q：进服需要准备什么？" FontWeight="Bold" FontSize="13" Foreground="#1E293B" />
+                            <TextBlock TextWrapping="Wrap" Foreground="#64748B" FontSize="12"
+                                       Text="先前往注册 LittleSkin 账号(建议使用上方跳转链接)，使用下载卡片下载整合包，或者使用自己的1.21.11游戏" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Background="White" CornerRadius="10" BorderBrush="#E2E8F0" BorderThickness="1" Margin="0,0,0,10" Padding="12,10">
+                        <StackPanel>
+                            <TextBlock Text="Q：正版账号能登陆吗" FontWeight="Bold" FontSize="13" Foreground="#1E293B" />
+                            <TextBlock TextWrapping="Wrap" Foreground="#64748B" FontSize="12"
+                                       Text="不可以，只能使用 LittleSkin 账号，未来可能会适配其他登录方式" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Background="White" CornerRadius="10" BorderBrush="#E2E8F0" BorderThickness="1" Margin="0,0,0,10" Padding="12,10">
+                        <StackPanel>
+                            <TextBlock Text="Q：怎么打开主菜单？" FontWeight="Bold" FontSize="13" Foreground="#1E293B" />
+                            <TextBlock TextWrapping="Wrap" Foreground="#64748B" FontSize="12"
+                                       Text="安装服务器模组后按 R(使用下载中的链接下载适合的版本)，或输入 /menu" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Background="White" CornerRadius="10" BorderBrush="#E2E8F0" BorderThickness="1" Margin="0,0,0,10" Padding="12,10">
+                        <StackPanel>
+                            <TextBlock Text="Q：王国基本指令怎么用？" FontWeight="Bold" FontSize="13" Foreground="#1E293B" />
+                            <TextBlock TextWrapping="Wrap" Foreground="#64748B" FontSize="12"
+                                       Text="输入 /k 查看指令" />
+                        </StackPanel>
+                    </Border>
+                 
+ <Border Background="White" CornerRadius="10" BorderBrush="#E2E8F0" BorderThickness="1" Margin="0,0,0,10" Padding="12,10">
+                        <StackPanel>
+                            <TextBlock Text="Q：传送他人或自己怎么用" FontWeight="Bold" FontSize="13" Foreground="#1E293B" />
+                            <TextBlock TextWrapping="Wrap" Foreground="#64748B" FontSize="12"
+                                       Text="输入 /tpa 玩家名 传送到他人位置  输入 /tpahere 玩家名 传送他人到自己位置" />
+                        </StackPanel>
+                    </Border>
+                  
+                             <Border Background="White" CornerRadius="10" BorderBrush="#E2E8F0" BorderThickness="1" Margin="0,0,0,0" Padding="12,10">
+                             <StackPanel>
+                            <TextBlock Text="Q：服务器炸了怎么办？" FontWeight="Bold" FontSize="13" Foreground="#1E293B" />
+                            <TextBlock TextWrapping="Wrap" Foreground="#64748B" FontSize="12"
+                                       Text="基本等周末处理，记得看群公告，不要着急，腐竹会自己修，不要炸群，QQ群:694372056" />
+                        </StackPanel>
+                    </Border>
+
+ <Border Background="White" CornerRadius="10" BorderBrush="#E2E8F0" BorderThickness="1" Margin="0,0,0,10" Padding="12,10">
+                        <StackPanel>
+                            <TextBlock Text="Q：群里那个 Bot Rishuですわ. 为啥奇奇怪怪的😕" FontWeight="Bold" FontSize="13" Foreground="#1E293B" />
+                            <TextBlock TextWrapping="Wrap" Foreground="#64748B" FontSize="12"
+                                       Text="他是聊天AI，他的主页:https://rishu.cfd/?_360safeparam=14404250  (白糖曰:如果显示传播木马什么的你就无视风险)" />
+                        </StackPanel>
+                    </Border>
+
+
+                </StackPanel>
+            </local:MyCard>
+           
             <!-- 主页制作卡片 -->
             <local:MyCard Title="主页制作" Margin="0,0,0,15" CanSwap="True" IsSwaped="True">
                 <StackPanel Margin="25,40,23,15">
