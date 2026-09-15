@@ -9,11 +9,18 @@
             Padding="20,16"
             Margin="10,10,10,10">
         <StackPanel>
+
             <!-- 标题 -->
-            <TextBlock Text="快捷入口"
+            <TextBlock Text="你好！{user} 让我们在这里开始"
                        FontSize="18"
                        FontWeight="SemiBold"
                        Foreground="#1E293B"
+                       Margin="0,0,0,12" />
+
+            <TextBlock Text="{}登录方式:{login}"
+                       FontSize="13"
+                       FontWeight="SemiBold"
+                       Foreground="#49628d"
                        Margin="0,0,0,12" />
 
             <!-- trademc.cc -->
@@ -188,7 +195,7 @@ QQ群：694372056（使用LittleSkin登录 否则没用!!!）
                         </StackPanel>
                     </Border>
                  
- <Border Background="White" CornerRadius="10" BorderBrush="#E2E8F0" BorderThickness="1" Margin="0,0,0,10" Padding="12,10">
+                    <Border Background="White" CornerRadius="10" BorderBrush="#E2E8F0" BorderThickness="1" Margin="0,0,0,10" Padding="12,10">
                         <StackPanel>
                             <TextBlock Text="Q：传送他人或自己怎么用" FontWeight="Bold" FontSize="13" Foreground="#1E293B" />
                             <TextBlock TextWrapping="Wrap" Foreground="#64748B" FontSize="12"
@@ -196,23 +203,21 @@ QQ群：694372056（使用LittleSkin登录 否则没用!!!）
                         </StackPanel>
                     </Border>
                   
-                             <Border Background="White" CornerRadius="10" BorderBrush="#E2E8F0" BorderThickness="1" Margin="0,0,0,0" Padding="12,10">
-                             <StackPanel>
+                    <Border Background="White" CornerRadius="10" BorderBrush="#E2E8F0" BorderThickness="1" Margin="0,0,0,0" Padding="12,10">
+                        <StackPanel>
                             <TextBlock Text="Q：服务器炸了怎么办？" FontWeight="Bold" FontSize="13" Foreground="#1E293B" />
                             <TextBlock TextWrapping="Wrap" Foreground="#64748B" FontSize="12"
                                        Text="基本等周末处理，记得看群公告，不要着急，腐竹会自己修，不要炸群，QQ群:694372056" />
                         </StackPanel>
                     </Border>
 
- <Border Background="White" CornerRadius="10" BorderBrush="#E2E8F0" BorderThickness="1" Margin="0,0,0,10" Padding="12,10">
+                    <Border Background="White" CornerRadius="10" BorderBrush="#E2E8F0" BorderThickness="1" Margin="0,0,0,10" Padding="12,10">
                         <StackPanel>
                             <TextBlock Text="Q：群里那个 Bot Rishuですわ. 为啥奇奇怪怪的😕" FontWeight="Bold" FontSize="13" Foreground="#1E293B" />
                             <TextBlock TextWrapping="Wrap" Foreground="#64748B" FontSize="12"
                                        Text="他是聊天AI，他的主页:https://rishu.cfd/?_360safeparam=14404250  (白糖曰:如果显示传播木马什么的你就无视风险)" />
                         </StackPanel>
                     </Border>
-
-
                 </StackPanel>
             </local:MyCard>
            
@@ -282,6 +287,24 @@ QQ群：694372056（使用LittleSkin登录 否则没用!!!）
                     </Border>
                 </StackPanel>
             </local:MyCard>
+
+            <!-- PCL信息 -->
+            <local:MyCard Title="PCL信息" Margin="0,0,0,15" CanSwap="True" IsSwaped="True">
+                <StackPanel Margin="25,40,23,15">
+                    <Border Background="White" CornerRadius="10" BorderBrush="#E2E8F0" BorderThickness="1" Margin="0,0,0,10" Padding="12,10">
+                        <StackPanel>
+                            <TextBlock Text="PCL版本:{pcl_version}{pcl_version_branch}{pcl_branch}" FontWeight="Bold" FontSize="13" Foreground="#1E293B" />
+                            <TextBlock TextWrapping="Wrap" Foreground="#64748B" FontSize="12"
+                                       Text="PCL 版本序号（越新的版本数字越大）{pcl_version_code}   识别码（不管怎样肯定是有用的）{identify}" />
+
+                            <TextBlock Text="Minecraft / Java" FontWeight="Bold" FontSize="14" Foreground="#1E293B" />
+                            <TextBlock TextWrapping="Wrap" Foreground="#64748B" FontSize="12"
+                                       Text="{}{version}/{java}" />
+                        </StackPanel>
+                    </Border>
+               </StackPanel>
+            </local:MyCard>
+
         </StackPanel>
     </Border>
 </local:MyCard>
