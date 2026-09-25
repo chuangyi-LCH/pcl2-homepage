@@ -1,0 +1,1654 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PCL2 Xaml 主页模块化编辑器</title>
+    <style>
+        :root {
+            --bg-color: #0d1117; --panel-bg: #161b22; --border-color: #30363d;
+            --text-main: #c9d1d9; --text-muted: #8b949e; --accent-blue: #58a6ff;
+            --accent-green: #238636; --accent-red: #da3633; --accent-yellow: #d29922;
+            --tag-bg: #1f242c; --workspace-bg: #F0F0F0; --workspace-grid: #D0D0D0;
+        }
+        body.light-mode {
+            --bg-color: #f6f8fa; --panel-bg: #ffffff; --border-color: #d0d7de;
+            --text-main: #24292f; --text-muted: #57606a; --accent-blue: #0969da;
+            --accent-green: #2da44e; --accent-red: #cf222e; --accent-yellow: #9a6700;
+            --tag-bg: #f3f4f6;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
+        html, body { overscroll-behavior: none; }
+        body { background-color: var(--bg-color); color: var(--text-main); height: 100vh; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+
+        header { height: 50px; background-color: var(--panel-bg); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; padding: 0 12px; z-index: 100; flex-shrink: 0; }
+        .nav-left, .nav-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .nav-btn { background: transparent; border: 1px solid var(--border-color); color: var(--text-main); padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 13px; transition: all 0.2s; }
+        .nav-btn:hover { background-color: rgba(128,128,128,0.1); }
+        .nav-btn.primary { background-color: var(--accent-green); border-color: var(--accent-green); color: white; }
+        .nav-btn.arrange { background-color: var(--accent-blue); border-color: var(--accent-blue); color: white; }
+        .nav-btn.preview-btn { background-color: #8B5CF6; border-color: #8B5CF6; color: white; }
+
+        #module-img-upload { display: none; }
+        .main-content { display: flex; flex: 1; overflow: hidden; }
+
+        .left-panel { width: 260px; background-color: var(--panel-bg); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; overflow-y: auto; z-index: 50; flex-shrink: 0; -webkit-overflow-scrolling: touch; }
+        .panel-title { font-size: 12px; font-weight: 600; color: var(--text-muted); padding: 12px 15px 5px 15px; text-transform: uppercase; border-bottom: 1px solid var(--border-color); margin-bottom: 5px; }
+
+        .module-item { background-color: var(--tag-bg); border: 1px solid var(--border-color); border-radius: 6px; padding: 12px 15px; margin: 5px 15px; cursor: grab; font-size: 13px; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s; touch-action: none; }
+        .module-item:hover { border-color: var(--accent-blue); }
+
+        .right-panel { flex: 1; background-color: var(--workspace-bg); padding: 12px; position: relative; overflow: auto; background-image: radial-gradient(var(--workspace-grid) 1px, transparent 1px); background-size: 20px 20px; -webkit-overflow-scrolling: touch; touch-action: pan-x pan-y; }
+        .module-container { position: relative; z-index: 10; width: 100%; min-height: 100%; }
+
+        .connection-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; overflow: visible; }
+        .connection-layer line.flow-line { stroke: #FFFFFF; stroke-width: 2; stroke-dasharray: 8, 5; fill: none; animation: flow 1.5s linear infinite; filter: drop-shadow(0 0 3px rgba(0,120,215,0.6)); }
+        @keyframes flow { to { stroke-dashoffset: -26; } }
+
+        .order-badge { position: absolute; top: -10px; left: -10px; background: #0078D7; color: #FFF; font-size: 11px; font-weight: bold; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.3); z-index: 30; pointer-events: none; border: 2px solid #FFF; }
+
+        .placed-module { position: absolute; cursor: grab; will-change: left, top; --mod-bg: #FFFFFF; --mod-fg: #000000; touch-action: none; }
+        .placed-module.selected { outline: 2px solid #0078D7; outline-offset: 3px; border-radius: 6px; z-index: 20; }
+        .placed-module.note-snap-target { outline: 2px dashed #FF9800; outline-offset: 4px; border-radius: 6px; }
+
+        .note-edge-preview { position: absolute; border: 2px dashed #FF9800; border-radius: 6px; pointer-events: none; z-index: 999; display: none; background: rgba(255, 152, 0, 0.08); }
+
+        .container-dropzone { min-height: 30px; border: 1px dashed transparent; border-radius: 4px; padding: 4px 0; display: flex; flex-direction: column; gap: 6px; transition: all 0.15s; }
+        .container-dropzone.drag-over { border-color: #0078D7; background-color: rgba(0,120,215,0.05); padding: 4px 6px; }
+        .container-dropzone:empty::before { content: '拖入模块到此处'; color: #C8C8C8; font-size: 11px; display: block; text-align: center; padding: 8px 0; }
+
+        .pcl-card { background: var(--mod-bg, #FFFFFF); color: var(--mod-fg, #000000); border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04); overflow: hidden; min-width: 260px; border: 1px solid rgba(0,0,0,0.05); }
+        .pcl-card-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px 6px 20px; font-size: 15px; font-weight: 600; color: var(--mod-fg, #202020); cursor: move; user-select: none; line-height: 1.4; }
+        .pcl-card-header > span:first-child { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .pcl-card-header .swap-btn { font-size: 14px; color: #999; cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: background 0.15s, color 0.15s; font-weight: normal; flex-shrink: 0; line-height: 1; user-select: none; }
+        .pcl-card-header .swap-btn:hover { background: rgba(0,0,0,0.06); color: #666; }
+        .pcl-card-body { padding: 4px 20px 16px 20px; font-size: 13px; line-height: 1.6; color: var(--mod-fg, #333); }
+        .pcl-card-body.collapsed { display: none; }
+
+        .pcl-hint { display: flex; align-items: flex-start; border-radius: 4px; padding: 8px 12px; font-size: 13px; line-height: 1.6; margin: 6px 0; color: #333; }
+        .pcl-hint.blue { background: #E7F1FB; color: #1A5A96; border-left: 3px solid #3B82C4; }
+        .pcl-hint.yellow { background: #FDF6E0; color: #8A6A00; border-left: 3px solid #E5A800; }
+        .pcl-hint.red { background: #FCEBEB; color: #A52020; border-left: 3px solid #D32F2F; }
+
+        .pcl-button { display: inline-flex; align-items: center; justify-content: center; min-height: 32px; padding: 0 20px; border-radius: 4px; font-size: 13px; cursor: default; font-weight: 500; width: fit-content; background: var(--mod-bg, #FFFFFF); color: var(--mod-fg, #000000); border: 1px solid rgba(0,0,0,0.2); }
+        .pcl-button.highlight { background: #0078D7; color: #FFFFFF; border-color: #0078D7; }
+        .pcl-button.red { background: #D32F2F; color: #FFFFFF; border-color: #D32F2F; }
+
+        .pcl-listitem { display: flex; align-items: center; padding: 10px 12px; background: var(--mod-bg, #FFFFFF); color: var(--mod-fg, #000000); border-radius: 4px; min-height: 52px; gap: 12px; border: 1px solid rgba(0,0,0,0.08); }
+        .pcl-listitem .item-logo { width: 32px; height: 32px; background: rgba(128,128,128,0.15); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0; background-size: cover; background-position: center; }
+        .pcl-listitem .item-info { display: flex; flex-direction: column; overflow: hidden; flex: 1; }
+        .pcl-listitem .item-title { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .pcl-listitem .item-subtitle { font-size: 11px; opacity: 0.6; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        .pcl-image { display: block; max-width: 100%; max-height: 150px; object-fit: contain; border-radius: 4px; margin: 0 auto; background: var(--mod-bg, transparent); }
+        .pcl-textblock { font-size: 13px; color: var(--mod-fg, #333); line-height: 1.6; padding: 3px 0; word-break: break-word; }
+        .pcl-stackpanel { display: flex; min-width: 120px; min-height: 40px; padding: 6px; border-radius: 4px; gap: 8px; background: var(--mod-bg, transparent); color: var(--mod-fg, #000); }
+        .pcl-stackpanel.horizontal { flex-direction: row; align-items: center; flex-wrap: wrap; }
+        .pcl-stackpanel.vertical { flex-direction: column; }
+
+        .placed-module[data-type="Note"] .pcl-note { background: #FFF8E0; border: 1px dashed #E5A800; color: #8A6A00; font-size: 12px; padding: 8px 12px; border-radius: 4px; cursor: pointer; min-width: 140px; }
+        .placed-module[data-type="Note"] .pcl-note::before { content: '备注：'; font-weight: bold; margin-right: 4px; }
+        .event-info-tag { font-size: 10px; color: #888; margin-top: 4px; padding: 2px 6px; background: rgba(0,0,0,0.05); border-radius: 3px; display: inline-block; }
+
+        .drag-ghost { position: fixed; pointer-events: none; opacity: 0.9; z-index: 9999; transform: translate(-50%, -50%); box-shadow: 0 8px 16px rgba(0,0,0,0.3); background-color: var(--panel-bg); border: 1px dashed var(--accent-blue); border-radius: 6px; padding: 8px 12px; font-size: 13px; color: var(--text-main); }
+
+        .snap-line { position: absolute; background-color: var(--accent-blue); z-index: 999; pointer-events: none; display: none; box-shadow: 0 0 4px var(--accent-blue); }
+        .snap-line-x { height: 1px; width: 100%; left: 0; }
+        .snap-line-y { width: 1px; height: 100%; top: 0; }
+
+        .context-menu { position: fixed; background-color: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 6px; padding: 5px 0; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 1000; display: none; min-width: 200px; }
+        .context-menu button { display: block; width: 100%; background: none; border: none; color: var(--text-main); padding: 12px 15px; text-align: left; cursor: pointer; font-size: 14px; }
+        .context-menu button:hover { background-color: rgba(128,128,128,0.1); }
+        .context-menu button.delete { color: var(--accent-red); }
+        .color-picker-wrapper { padding: 10px 15px; display: flex; align-items: center; gap: 10px; font-size: 13px; border-bottom: 1px solid var(--border-color); }
+        .color-picker-wrapper input[type="color"] { background: none; border: none; cursor: pointer; width: 32px; height: 32px; padding: 0; }
+        .color-picker-wrapper .reset-btn { margin-left: auto; font-size: 11px; color: var(--accent-blue); background: none; border: none; cursor: pointer; padding: 4px 8px; border-radius: 3px; }
+
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 2000; padding: 15px; }
+        .modal-content { background-color: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; width: 100%; max-width: 460px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); max-height: 90vh; overflow-y: auto; }
+        .modal-content h3 { margin-bottom: 15px; font-size: 16px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 13px; margin-bottom: 5px; color: var(--text-muted); }
+        .form-group select, .form-group input, .form-group textarea { width: 100%; padding: 10px; border-radius: 4px; border: 1px solid var(--border-color); background-color: var(--bg-color); color: var(--text-main); font-size: 14px; font-family: inherit; }
+        .form-group textarea { resize: vertical; min-height: 80px; }
+        .form-group .hint { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+        .modal-actions button { padding: 8px 18px; border-radius: 4px; border: 1px solid var(--border-color); background-color: transparent; color: var(--text-main); cursor: pointer; font-size: 14px; }
+        .modal-actions button.primary { background-color: var(--accent-blue); border-color: var(--accent-blue); color: white; }
+
+        .about-list { margin-top: 15px; display: flex; flex-direction: column; gap: 12px; }
+        .about-item { display: flex; align-items: center; gap: 12px; padding: 10px; background-color: var(--bg-color); border: 1px solid var(--border-color); border-radius: 6px; }
+        .about-item .avatar { width: 36px; height: 36px; background-color: var(--accent-blue); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 16px; flex-shrink: 0; }
+        .about-item .info .name { font-weight: bold; font-size: 14px; }
+
+        .source-preview { position: fixed; top: 50px; left: 260px; right: 0; bottom: 0; background-color: rgba(0,0,0,0.85); display: none; flex-direction: column; padding: 15px; z-index: 500; }
+        .source-preview textarea { flex: 1; background-color: var(--panel-bg); color: var(--text-main); border: 1px solid var(--border-color); border-radius: 6px; padding: 15px; font-family: monospace; resize: none; outline: none; font-size: 12px; }
+
+        #toast-container { position: fixed; top: 60px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; align-items: center; padding: 0 10px; }
+        .toast { background-color: var(--panel-bg); color: var(--text-main); border: 1px solid var(--border-color); border-left: 4px solid var(--accent-red); padding: 12px 18px; border-radius: 6px; font-size: 13px; box-shadow: 0 4px 12px rgba(0,0,0,0.4); animation: fadeInDown 0.3s ease-out; display: flex; align-items: center; gap: 8px; max-width: 500px; }
+        .toast.warning { border-left-color: var(--accent-yellow); }
+        .toast.success { border-left-color: var(--accent-green); }
+        .toast.info { border-left-color: #8B5CF6; }
+        .toast-icon { font-weight: bold; }
+        .toast.error .toast-icon { color: var(--accent-red); }
+        .toast.warning .toast-icon { color: var(--accent-yellow); }
+        .toast.success .toast-icon { color: var(--accent-green); }
+        .toast.info .toast-icon { color: #8B5CF6; }
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeOutUp { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-20px); } }
+
+        #custom-tooltip { position: fixed; padding: 5px 12px; background: #E7F1FB; border: 1px solid #3B82C4; color: #1A5A96; font-size: 12px; border-radius: 4px; z-index: 10000; pointer-events: none; display: none; max-width: 300px; line-height: 1.5; box-shadow: 0 2px 8px rgba(0,0,0,0.15); white-space: pre-wrap; }
+
+        .pcl-dialog-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.35); display: none; justify-content: center; align-items: center; z-index: 3000; padding: 15px; }
+        .pcl-dialog { background: #FFFFFF; border-radius: 8px; box-shadow: 0 8px 32px rgba(0,0,0,0.25), 0 2px 8px rgba(0,0,0,0.1); width: 100%; max-width: 420px; padding: 24px 28px 20px; animation: dialogIn 0.2s ease-out; }
+        @keyframes dialogIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        .pcl-dialog-title { font-size: 20px; font-weight: 500; color: #1A5A96; padding-bottom: 8px; border-bottom: 2px solid #1A5A96; margin-bottom: 16px; line-height: 1.3; word-break: break-word; }
+        .pcl-dialog-content { font-size: 14px; color: #333333; line-height: 1.7; white-space: pre-wrap; margin-bottom: 20px; word-break: break-word; }
+        .pcl-dialog-actions { display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
+        .pcl-dialog-btn { padding: 6px 24px; background: #FFFFFF; border: 1px solid #999999; border-radius: 4px; color: #333333; font-size: 14px; cursor: pointer; transition: background 0.15s; font-family: inherit; text-decoration: none; display: inline-block; text-align: center; }
+        .pcl-dialog-btn:hover { background: #F5F5F5; }
+        .pcl-dialog-btn:active { background: #EAEAEA; }
+
+        .dialog-live-preview { margin-top: 15px; padding: 12px; background: rgba(0,0,0,0.15); border-radius: 6px; border: 1px dashed var(--border-color); }
+        body.light-mode .dialog-live-preview { background: #F5F5F5; }
+        .dialog-live-preview-title { font-size: 11px; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; }
+        .pcl-dialog-mini { background: #FFFFFF; border-radius: 6px; box-shadow: 0 4px 16px rgba(0,0,0,0.2); padding: 16px 20px 14px; transform: scale(0.92); transform-origin: top left; width: 108%; }
+        .pcl-dialog-mini .pcl-dialog-title { font-size: 16px; padding-bottom: 6px; margin-bottom: 12px; }
+        .pcl-dialog-mini .pcl-dialog-content { font-size: 12px; margin-bottom: 14px; }
+        .pcl-dialog-mini .pcl-dialog-btn { padding: 4px 16px; font-size: 12px; }
+
+        #window-editor-panel { display: none; padding: 12px; background: rgba(139, 92, 246, 0.06); border-radius: 6px; border: 1px solid rgba(139, 92, 246, 0.3); margin-bottom: 15px; }
+        body.light-mode #window-editor-panel { background: rgba(139, 92, 246, 0.05); }
+        #window-editor-panel .panel-label { font-size: 12px; font-weight: 600; color: #8B5CF6; margin-bottom: 10px; }
+
+        body.preview-mode .left-panel,
+        body.preview-mode .connection-layer,
+        body.preview-mode .order-badge,
+        body.preview-mode .snap-line,
+        body.preview-mode .note-edge-preview,
+        body.preview-mode .event-info-tag,
+        body.preview-mode .placed-module[data-type="Note"],
+        body.preview-mode .pcl-card-header .swap-btn,
+        body.preview-mode .context-menu { display: none !important; }
+
+        body.preview-mode .container-dropzone { border-color: transparent !important; background: transparent !important; padding: 0 !important; min-height: 0 !important; gap: 8px !important; }
+        body.preview-mode .container-dropzone:empty::before { display: none !important; }
+        body.preview-mode .placed-module { cursor: default; touch-action: auto; outline: none !important; }
+        body.preview-mode .right-panel { background-color: #FFFFFF; background-image: none; display: flex; justify-content: center; }
+        body.preview-mode .module-container { display: flex !important; flex-direction: column !important; gap: 15px !important; align-items: stretch !important; width: 100%; max-width: 760px; padding: 20px; min-height: auto; }
+        body.preview-mode .placed-module { position: relative !important; left: auto !important; top: auto !important; width: 100%; }
+        body.preview-mode .pcl-card { width: 100%; }
+        body.preview-mode .container-dropzone { display: flex !important; flex-direction: column !important; }
+        body.preview-mode .pcl-button, body.preview-mode .pcl-listitem { cursor: pointer; }
+        body.preview-mode .pcl-button:hover { filter: brightness(1.05); }
+        body.preview-mode .pcl-listitem:hover { background: #FAFAFA; }
+
+        @media (max-width: 768px) {
+            header { padding: 0 8px; height: 46px; }
+            .nav-btn { padding: 5px 8px; font-size: 12px; }
+            .left-panel { width: 150px; }
+            .panel-title { font-size: 11px; padding: 10px 10px 4px; }
+            .module-item { padding: 10px 10px; font-size: 12px; margin: 4px 8px; }
+            .right-panel { padding: 8px; }
+            .pcl-card { min-width: 200px; }
+            .pcl-card-header { padding: 12px 15px 4px 15px; font-size: 14px; }
+            .pcl-card-body { padding: 4px 15px 12px 15px; }
+            .source-preview { left: 0; top: 46px; }
+            .context-menu { min-width: 180px; }
+            .context-menu button { padding: 14px 15px; font-size: 15px; }
+            .modal-content { padding: 15px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="nav-left">
+            <button class="nav-btn" id="btn-preset">加载预设</button>
+            <button class="nav-btn arrange" id="btn-arrange">一键整理</button>
+            <button class="nav-btn preview-btn" id="btn-preview-mode">预览主页</button>
+            <button class="nav-btn" id="btn-preview">源码预览</button>
+        </div>
+        <div class="nav-right">
+            <button class="nav-btn" id="btn-about">关于作者</button>
+            <button class="nav-btn" id="btn-theme">切换暗色</button>
+            <button class="nav-btn primary" id="btn-export">直接导出</button>
+        </div>
+    </header>
+
+    <div class="main-content">
+        <aside class="left-panel">
+            <div class="panel-title">基础控件</div>
+            <div class="module-item" data-type="TextBlock" data-xaml="&lt;TextBlock TextWrapping=&quot;Wrap&quot; Margin=&quot;0,0,0,4&quot; Text=&quot;%%TEXT%%&quot; /&gt;" data-text="默认文本">TextBlock 文本框</div>
+            <div class="module-item" data-type="MyHint" data-xaml="&lt;local:MyHint Margin=&quot;0,4,0,4&quot; Theme=&quot;Blue&quot; Text=&quot;%%TEXT%%&quot; /&gt;" data-text="提示内容">MyHint 提示条</div>
+            <div class="module-item" data-type="MyButton" data-xaml="&lt;local:MyButton Height=&quot;35&quot; HorizontalAlignment=&quot;Left&quot; Padding=&quot;20,0,20,0&quot; Text=&quot;%%TEXT%%&quot; EventType=&quot;打开网页&quot; EventData=&quot;https://www.bilibili.com/&quot; /&gt;" data-text="点击我">MyButton 按钮</div>
+            <div class="module-item" data-type="MyImage" data-xaml="&lt;local:MyImage Height=&quot;50&quot; HorizontalAlignment=&quot;Center&quot; Source=&quot;%%SOURCE%%&quot; /&gt;" data-text="图片模块" data-source="https://www.baidu.com/img/flexible/logo/pc/result.png">MyImage 图片</div>
+            <div class="module-item" data-type="MyListItem" data-xaml="&lt;local:MyListItem Margin=&quot;-5,2,-5,8&quot; Logo=&quot;https://www.baidu.com/favicon.ico&quot; Title=&quot;%%TEXT%%&quot; Info=&quot;详细信息&quot; Type=&quot;Clickable&quot; EventType=&quot;打开网页&quot; EventData=&quot;https://www.baidu.com/&quot; /&gt;" data-text="列表项">MyListItem 列表项</div>
+
+            <div class="panel-title">布局与容器</div>
+            <div class="module-item" data-type="MyCard" data-xaml="&lt;local:MyCard Title=&quot;%%TEXT%%&quot; Margin=&quot;0,0,0,15&quot; CanSwap=&quot;True&quot; IsSwapped=&quot;False&quot;&gt;&#xA;    &lt;StackPanel Margin=&quot;25,40,23,15&quot;&gt;&#xA;%%CONTENT%%&#xA;    &lt;/StackPanel&gt;&#xA;&lt;/local:MyCard&gt;" data-text="新卡片">MyCard 卡片</div>
+            <div class="module-item" data-type="StackPanel" data-xaml="&lt;StackPanel Orientation=&quot;Horizontal&quot; HorizontalAlignment=&quot;Center&quot;&gt;%%CONTENT%%&lt;/StackPanel&gt;" data-text="横向布局">StackPanel 横向</div>
+            <div class="module-item" data-type="StackPanelV" data-xaml="&lt;StackPanel Orientation=&quot;Vertical&quot; Margin=&quot;0,5,0,5&quot;&gt;%%CONTENT%%&lt;/StackPanel&gt;" data-text="垂直列表">StackPanel 垂直</div>
+
+            <div class="panel-title">辅助元素</div>
+            <div class="module-item" data-type="Note" data-text="在这里输入备注内容...">备注 / 注释</div>
+        </aside>
+
+        <main class="right-panel" id="workspace">
+            <svg class="connection-layer" id="connection-layer" xmlns="http://www.w3.org/2000/svg"></svg>
+            <div class="snap-line snap-line-x" id="snap-line-x"></div>
+            <div class="snap-line snap-line-y" id="snap-line-y"></div>
+            <div class="note-edge-preview" id="note-edge-preview"></div>
+            <div class="module-container" id="module-container"></div>
+        </main>
+    </div>
+
+    <div id="toast-container"></div>
+    <div id="custom-tooltip"></div>
+
+    <div class="source-preview" id="source-preview"><textarea id="source-textarea" readonly></textarea></div>
+    <input type="file" id="module-img-upload" accept="image/*">
+
+    <div class="context-menu" id="context-menu">
+        <div class="color-picker-wrapper"><span>背景色:</span><input type="color" id="module-bg-color" value="#FFFFFF"><button class="reset-btn" id="btn-reset-bg">重置</button></div>
+        <div class="color-picker-wrapper"><span>文字色:</span><input type="color" id="module-text-color" value="#000000"><button class="reset-btn" id="btn-reset-fg">重置</button></div>
+        <button id="btn-edit-note" style="display: none;">编辑备注</button>
+        <button id="btn-edit-event" style="display: none;">编辑交互</button>
+        <button id="btn-upload-module-img" style="display: none;">上传图片</button>
+        <button class="delete" id="btn-delete-module">删除模块</button>
+    </div>
+
+    <div class="modal-overlay" id="event-modal">
+        <div class="modal-content">
+            <h3>编辑交互</h3>
+            <div class="form-group"><label>事件类型</label>
+                <select id="event-type">
+                    <option value="打开网页">打开网页</option>
+                    <option value="打开文件">打开文件</option>
+                    <option value="启动游戏">启动游戏</option>
+                    <option value="启动服务器">启动服务器</option>
+                    <option value="弹出窗口">弹出窗口</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="event-data-group">
+                <label id="event-data-label">事件数据 (网址)</label>
+                <input type="text" id="event-data">
+                <div class="hint" id="event-data-hint">例如: https://www.bilibili.com/</div>
+            </div>
+
+            <div id="window-editor-panel">
+                <div class="panel-label">弹窗配置（编辑时实时可视化）</div>
+                <div class="form-group">
+                    <label>弹窗标题</label>
+                    <input type="text" id="win-title" placeholder="这是标题">
+                </div>
+                <div class="form-group">
+                    <label>弹窗内容（支持 \n 换行）</label>
+                    <textarea id="win-content" placeholder="标题与内容以竖线间隔。\n你也可以直接在其中换行。"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>确定按钮文字</label>
+                    <input type="text" id="win-btn-text" placeholder="确定" value="确定">
+                </div>
+                <div class="form-group">
+                    <label>按钮点击后跳转</label>
+                    <select id="win-btn-action">
+                        <option value="">仅关闭弹窗</option>
+                        <option value="打开文件">打开文件</option>
+                        <option value="弹出窗口">弹出新窗口</option>
+                    </select>
+                </div>
+                <div class="form-group" id="win-btn-data-group" style="display: none;">
+                    <label id="win-btn-data-label">跳转数据</label>
+                    <input type="text" id="win-btn-data">
+                    <div class="hint" id="win-btn-data-hint"></div>
+                </div>
+
+                <div class="dialog-live-preview">
+                    <div class="dialog-live-preview-title">↓ 编辑时可视化预览 ↓</div>
+                    <div class="pcl-dialog-mini">
+                        <div class="pcl-dialog-title" id="mini-title">这是标题</div>
+                        <div class="pcl-dialog-content" id="mini-content">内容预览...</div>
+                        <div class="pcl-dialog-actions"><button class="pcl-dialog-btn" id="mini-btn">确定</button></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>悬停提示 ToolTip（可选）</label>
+                <input type="text" id="event-tooltip" placeholder="鼠标停在按钮上时显示此文本">
+                <div class="hint">示例：把鼠标停在这里别动…… 就能看到这句话！</div>
+            </div>
+
+            <div class="modal-actions"><button id="btn-cancel-event">取消</button><button class="primary" id="btn-save-event">保存</button></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="note-modal">
+        <div class="modal-content">
+            <h3>编辑备注</h3>
+            <div class="form-group"><label>备注内容</label><textarea id="note-text"></textarea></div>
+            <div class="modal-actions"><button id="btn-cancel-note">取消</button><button class="primary" id="btn-save-note">保存</button></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="about-modal">
+        <div class="modal-content">
+            <h3>关于本项目与创作者</h3>
+            <div class="about-list">
+                <div class="about-item"><div class="avatar">白</div><div class="info"><div class="name">白糖</div></div></div>
+                <div class="about-item"><div class="avatar">创</div><div class="info"><div class="name">创世</div></div></div>
+                <div class="about-item"><div class="avatar" style="background-color: var(--accent-green);">DS</div><div class="info"><div class="name">DeepSeek</div></div></div>
+            </div>
+            <div class="modal-actions"><button class="primary" id="btn-close-about">我知道了</button></div>
+        </div>
+    </div>
+
+    <div class="pcl-dialog-overlay" id="pcl-dialog-overlay">
+        <div class="pcl-dialog">
+            <div class="pcl-dialog-title" id="pcl-dialog-title">这是标题</div>
+            <div class="pcl-dialog-content" id="pcl-dialog-content">内容...</div>
+            <div class="pcl-dialog-actions" id="pcl-dialog-actions"></div>
+        </div>
+    </div>
+
+    <script>
+        const IS_TOUCH = 'ontouchstart' in window && navigator.maxTouchPoints > 0;
+        const DRAG_THRESHOLD = IS_TOUCH ? 8 : 5;
+        const LONG_PRESS_DURATION = 500;
+        const NOTE_EDGE_GAP = 8;
+
+        let uidCounter = 0;
+        function genUid() { return 'uid_' + (++uidCounter) + '_' + Date.now().toString(36); }
+        function getClientPos(e) {
+            if (e.touches && e.touches.length) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            if (e.changedTouches && e.changedTouches.length) return { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY };
+            return { x: e.clientX, y: e.clientY };
+        }
+
+        const workspace = document.getElementById('workspace');
+        const moduleContainer = document.getElementById('module-container');
+        const svgLayer = document.getElementById('connection-layer');
+        const notePreview = document.getElementById('note-edge-preview');
+        const contextMenu = document.getElementById('context-menu');
+        const colorPickerBg = document.getElementById('module-bg-color');
+        const colorPickerText = document.getElementById('module-text-color');
+        const btnResetBg = document.getElementById('btn-reset-bg');
+        const btnResetFg = document.getElementById('btn-reset-fg');
+        const btnDeleteModule = document.getElementById('btn-delete-module');
+        const btnUploadModuleImg = document.getElementById('btn-upload-module-img');
+        const btnEditEvent = document.getElementById('btn-edit-event');
+        const btnEditNote = document.getElementById('btn-edit-note');
+        const moduleImgUpload = document.getElementById('module-img-upload');
+        const sourcePreview = document.getElementById('source-preview');
+        const sourceTextarea = document.getElementById('source-textarea');
+        const btnTheme = document.getElementById('btn-theme');
+        const btnAbout = document.getElementById('btn-about');
+        const aboutModal = document.getElementById('about-modal');
+        const btnCloseAbout = document.getElementById('btn-close-about');
+        const snapLineX = document.getElementById('snap-line-x');
+        const snapLineY = document.getElementById('snap-line-y');
+        const eventModal = document.getElementById('event-modal');
+        const eventTypeSelect = document.getElementById('event-type');
+        const eventDataInput = document.getElementById('event-data');
+        const eventDataLabel = document.getElementById('event-data-label');
+        const eventDataHint = document.getElementById('event-data-hint');
+        const eventDataGroup = document.getElementById('event-data-group');
+        const eventTooltipInput = document.getElementById('event-tooltip');
+        const btnCancelEvent = document.getElementById('btn-cancel-event');
+        const btnSaveEvent = document.getElementById('btn-save-event');
+        const noteModal = document.getElementById('note-modal');
+        const noteTextInput = document.getElementById('note-text');
+        const btnCancelNote = document.getElementById('btn-cancel-note');
+        const btnSaveNote = document.getElementById('btn-save-note');
+        const btnPreviewMode = document.getElementById('btn-preview-mode');
+
+        const windowEditorPanel = document.getElementById('window-editor-panel');
+        const winTitleInput = document.getElementById('win-title');
+        const winContentInput = document.getElementById('win-content');
+        const winBtnTextInput = document.getElementById('win-btn-text');
+        const winBtnActionSelect = document.getElementById('win-btn-action');
+        const winBtnDataGroup = document.getElementById('win-btn-data-group');
+        const winBtnDataLabel = document.getElementById('win-btn-data-label');
+        const winBtnDataInput = document.getElementById('win-btn-data');
+        const winBtnDataHint = document.getElementById('win-btn-data-hint');
+        const miniTitle = document.getElementById('mini-title');
+        const miniContent = document.getElementById('mini-content');
+        const miniBtn = document.getElementById('mini-btn');
+
+        const customTooltip = document.getElementById('custom-tooltip');
+        const pclDialogOverlay = document.getElementById('pcl-dialog-overlay');
+        const pclDialogTitle = document.getElementById('pcl-dialog-title');
+        const pclDialogContent = document.getElementById('pcl-dialog-content');
+        const pclDialogActions = document.getElementById('pcl-dialog-actions');
+
+        const DEFAULT_BG = '#FFFFFF';
+        const DEFAULT_FG = '#000000';
+
+        let selectedModule = null;
+        let draggedItem = null;
+        let isDragging = false;
+        let dragSourceType = null;
+        let mouseDownX = 0, mouseDownY = 0, dragOffsetX = 0, dragOffsetY = 0;
+        let longPressTimer = null;
+        let longPressFired = false;
+
+        function supportsBackground(type) { return type === 'TextBlock' || type === 'StackPanel' || type === 'StackPanelV'; }
+        function supportsForeground(type) { return type === 'TextBlock'; }
+
+        function escapeXaml(str) {
+            if (typeof str !== 'string') return '';
+            return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                      .replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+        }
+        function escapeNote(str) { return (typeof str === 'string') ? str.replace(/-->/g, '—>') : ''; }
+        function safeReplace(str, regex, replacement) { return str.replace(regex, () => replacement); }
+        function decodeHtmlEntities(str) { const t = document.createElement('textarea'); t.innerHTML = str; return t.value; }
+
+        function showToast(msg, type = 'error', duration = 3000) {
+            const c = document.getElementById('toast-container');
+            const t = document.createElement('div');
+            t.className = `toast ${type}`;
+            const icons = { error: '×', warning: '!', success: '√', info: 'i' };
+            t.innerHTML = `<span class="toast-icon">${icons[type] || '×'}</span><span>${msg}</span>`;
+            c.appendChild(t);
+            setTimeout(() => { t.style.animation = 'fadeOutUp 0.3s ease-in forwards'; setTimeout(() => t.remove(), 300); }, duration);
+        }
+
+        function hideSnapLines() { snapLineX.style.display = 'none'; snapLineY.style.display = 'none'; notePreview.style.display = 'none'; }
+        function isPreviewMode() { return document.body.classList.contains('preview-mode'); }
+
+        function getOrderedSiblings(parentEl) {
+            const arr = Array.from(parentEl.children).filter(c => c.classList && c.classList.contains('placed-module'));
+            arr.sort((a, b) => (parseInt(a.dataset.order) || 0) - (parseInt(b.dataset.order) || 0));
+            return arr;
+        }
+        function normalizeOrders(parentEl) { getOrderedSiblings(parentEl).forEach((m, i) => { m.dataset.order = i; }); }
+        function assignNewOrder(module, parentEl) {
+            const sibs = Array.from(parentEl.children).filter(c => c !== module && c.classList && c.classList.contains('placed-module'));
+            const maxO = sibs.reduce((mx, m) => Math.max(mx, parseInt(m.dataset.order) || 0), -1);
+            module.dataset.order = maxO + 1;
+        }
+        function normalizeOrdersByPosition(parentEl) {
+            const arr = Array.from(parentEl.children).filter(c => c.classList.contains('placed-module'));
+            arr.sort((a, b) => {
+                if (Math.abs(a.offsetTop - b.offsetTop) < 40) return a.offsetLeft - b.offsetLeft;
+                return a.offsetTop - b.offsetTop;
+            });
+            arr.forEach((m, i) => { m.dataset.order = i; });
+        }
+
+        function redrawConnections() {
+            if (isPreviewMode()) { svgLayer.innerHTML = ''; return; }
+            svgLayer.innerHTML = '';
+            drawConnectionsInLevel(getOrderedSiblings(moduleContainer));
+        }
+        function drawConnectionsInLevel(modules) {
+            if (modules.length >= 2) {
+                const cR = workspace.getBoundingClientRect();
+                for (let i = 0; i < modules.length - 1; i++) {
+                    const a = modules[i], b = modules[i + 1];
+                    const aR = a.getBoundingClientRect();
+                    const bR = b.getBoundingClientRect();
+                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    line.setAttribute('x1', aR.right - cR.left - 5);
+                    line.setAttribute('y1', aR.top - cR.top + aR.height / 2);
+                    line.setAttribute('x2', bR.left - cR.left + 5);
+                    line.setAttribute('y2', bR.top - cR.top + bR.height / 2);
+                    line.setAttribute('class', 'flow-line');
+                    svgLayer.appendChild(line);
+                }
+            }
+            modules.forEach((m, i) => {
+                let badge = m.querySelector(':scope > .order-badge');
+                if (!badge) {
+                    badge = document.createElement('div');
+                    badge.className = 'order-badge';
+                    m.appendChild(badge);
+                }
+                badge.innerText = i + 1;
+            });
+            modules.forEach(m => {
+                const dz = m.querySelector(':scope > .pcl-card > .pcl-card-body > .container-dropzone') ||
+                           m.querySelector(':scope > .pcl-stackpanel > .container-dropzone');
+                if (dz) drawConnectionsInLevel(getOrderedSiblings(dz));
+            });
+        }
+
+        function findNearestEdge(noteModule) {
+            const parentEl = noteModule.parentElement;
+            const others = Array.from(parentEl.children).filter(c => c !== noteModule && c.classList && c.classList.contains('placed-module'));
+            if (others.length === 0) return null;
+            const noteR = noteModule.getBoundingClientRect();
+            const ncx = noteR.left + noteR.width / 2;
+            const ncy = noteR.top + noteR.height / 2;
+            let nearest = null, minDist = Infinity;
+            others.forEach(m => {
+                const r = m.getBoundingClientRect();
+                const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+                const d = Math.sqrt((cx - ncx) ** 2 + (cy - ncy) ** 2);
+                if (d < minDist) { minDist = d; nearest = m; }
+            });
+            if (!nearest) return null;
+            const nr = nearest.getBoundingClientRect();
+            const dx = ncx - (nr.left + nr.width / 2);
+            const dy = ncy - (nr.top + nr.height / 2);
+            const normX = Math.abs(dx) / ((nr.width / 2) || 1);
+            const normY = Math.abs(dy) / ((nr.height / 2) || 1);
+            let edge;
+            if (normX >= normY) edge = dx > 0 ? 'right' : 'left';
+            else edge = dy > 0 ? 'bottom' : 'top';
+            return { target: nearest, edge };
+        }
+        function applyNoteEdgePosition(note, target, edge) {
+            const wR = moduleContainer.getBoundingClientRect();
+            const tR = target.getBoundingClientRect();
+            const relLeft = tR.left - wR.left;
+            const relTop = tR.top - wR.top;
+            const w = note.offsetWidth, h = note.offsetHeight;
+            let newLeft, newTop;
+            if (edge === 'left') { newLeft = relLeft - w - NOTE_EDGE_GAP; newTop = relTop + (target.offsetHeight - h) / 2; }
+            else if (edge === 'right') { newLeft = relLeft + target.offsetWidth + NOTE_EDGE_GAP; newTop = relTop + (target.offsetHeight - h) / 2; }
+            else if (edge === 'top') { newTop = relTop - h - NOTE_EDGE_GAP; newLeft = relLeft + (target.offsetWidth - w) / 2; }
+            else { newTop = relTop + target.offsetHeight + NOTE_EDGE_GAP; newLeft = relLeft + (target.offsetWidth - w) / 2; }
+            note.style.left = newLeft + 'px';
+            note.style.top = newTop + 'px';
+        }
+        function updateAttachedNotes(movedModule) {
+            if (!movedModule || !movedModule.dataset.uid) return;
+            const uid = movedModule.dataset.uid;
+            const parentEl = movedModule.parentElement;
+            document.querySelectorAll('.placed-module[data-type="Note"]').forEach(note => {
+                if (note.dataset.attachedUid === uid) {
+                    if (note.parentElement === parentEl) applyNoteEdgePosition(note, movedModule, note.dataset.attachedEdge);
+                    else { delete note.dataset.attachedUid; delete note.dataset.attachedEdge; }
+                }
+            });
+        }
+        function snapNoteToEdge(noteModule) {
+            const result = findNearestEdge(noteModule);
+            if (!result) {
+                delete noteModule.dataset.attachedUid;
+                delete noteModule.dataset.attachedEdge;
+                noteModule.dataset.order = 0;
+                return null;
+            }
+            noteModule.dataset.attachedUid = result.target.dataset.uid;
+            noteModule.dataset.attachedEdge = result.edge;
+            applyNoteEdgePosition(noteModule, result.target, result.edge);
+            const parentEl = noteModule.parentElement;
+            const others = Array.from(parentEl.children).filter(c => c !== noteModule && c.classList && c.classList.contains('placed-module'));
+            const targetOrder = parseInt(result.target.dataset.order) || 0;
+            const insertAfter = (result.edge === 'right' || result.edge === 'bottom');
+            const insertAt = insertAfter ? targetOrder + 1 : targetOrder;
+            others.forEach(m => { const o = parseInt(m.dataset.order) || 0; if (o >= insertAt) m.dataset.order = o + 1; });
+            noteModule.dataset.order = insertAt;
+            return result.edge;
+        }
+
+        function togglePreviewMode() {
+            if (isPreviewMode()) {
+                document.body.classList.remove('preview-mode');
+                btnPreviewMode.innerText = '预览主页';
+                btnPreviewMode.classList.add('preview-btn');
+                hideTooltip();
+                Array.from(moduleContainer.children).forEach(m => {
+                    if (m.classList.contains('placed-module') && m.dataset.savedLeft !== undefined) {
+                        m.style.left = m.dataset.savedLeft;
+                        m.style.top = m.dataset.savedTop;
+                    }
+                });
+                setTimeout(redrawConnections, 50);
+                showToast('已退出预览模式', 'info');
+            } else {
+                Array.from(moduleContainer.children).forEach(m => {
+                    if (m.classList.contains('placed-module')) {
+                        m.dataset.savedLeft = m.style.left || '';
+                        m.dataset.savedTop = m.style.top || '';
+                    }
+                });
+                document.body.classList.add('preview-mode');
+                btnPreviewMode.innerText = '退出预览';
+                btnPreviewMode.classList.remove('preview-btn');
+                svgLayer.innerHTML = '';
+                showToast('预览模式 · 点击按钮可触发交互', 'info');
+            }
+        }
+        btnPreviewMode.addEventListener('click', togglePreviewMode);
+
+        function showTooltip(text, x, y) {
+            if (!text) return;
+            customTooltip.innerText = text;
+            customTooltip.style.display = 'block';
+            const w = customTooltip.offsetWidth, h = customTooltip.offsetHeight;
+            let px = x + 12, py = y + 18;
+            if (px + w > window.innerWidth - 10) px = x - w - 12;
+            if (py + h > window.innerHeight - 10) py = y - h - 12;
+            customTooltip.style.left = px + 'px';
+            customTooltip.style.top = py + 'px';
+        }
+        function hideTooltip() { customTooltip.style.display = 'none'; }
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isPreviewMode()) return;
+            const target = e.target.closest('.placed-module');
+            if (target && target.dataset.tooltip) showTooltip(target.dataset.tooltip, e.clientX, e.clientY);
+            else hideTooltip();
+        });
+
+        // ============================================================
+        // 弹窗（打开网页选项已移除）
+        // ============================================================
+        function showPclDialog(title, content, buttonText, buttonAction) {
+            pclDialogTitle.innerText = title || '提示';
+            pclDialogContent.innerText = (content || '').replace(/\\n/g, '\n');
+            pclDialogActions.innerHTML = '';
+
+            const btnText = buttonText || '确定';
+            const btn = document.createElement('button');
+            btn.className = 'pcl-dialog-btn';
+            btn.innerText = btnText;
+            btn.addEventListener('click', () => {
+                const action = buttonAction;
+                hidePclDialog();
+                if (action && action.type) setTimeout(() => executeEvent(action.type, action.data), 0);
+            });
+            pclDialogActions.appendChild(btn);
+
+            pclDialogOverlay.style.display = 'flex';
+        }
+        function hidePclDialog() { pclDialogOverlay.style.display = 'none'; }
+        pclDialogOverlay.addEventListener('click', (e) => { if (e.target === pclDialogOverlay) hidePclDialog(); });
+
+        function executeEvent(type, data) {
+            if (!type) return;
+            if (type === '打开网页') {
+                if (!data || !data.trim()) { showToast('未配置网址', 'warning'); return; }
+                let url = data.trim();
+                if (!/^[a-z][a-z0-9+\-.]*:/i.test(url)) url = 'https://' + url;
+                window.open(url, '_blank');
+                showToast('已打开: ' + url, 'success');
+            } else if (type === '弹出窗口') {
+                const parts = (data || '').split('|');
+                const t = parts[0] || '提示';
+                const c = parts[1] || '';
+                const btn = parts[2] || '确定';
+                const baType = parts[3] || '';
+                const baData = parts.slice(4).join('|') || '';
+                showPclDialog(t, c, btn, baType ? { type: baType, data: baData } : null);
+            } else if (type === '打开文件') showToast('打开文件: ' + data, 'info');
+            else if (type === '启动游戏') showToast('启动游戏: ' + data, 'info');
+            else if (type === '启动服务器') showToast('启动服务器: ' + data, 'info');
+        }
+
+        document.addEventListener('click', (e) => {
+            if (!isPreviewMode()) return;
+            if (e.target.closest('#pcl-dialog-overlay')) return;
+            const btn = e.target.closest('.pcl-button') || e.target.closest('.pcl-listitem');
+            if (!btn) return;
+            const module = btn.closest('.placed-module');
+            if (!module) return;
+            const type = module.dataset.eventType || '';
+            if (!type) return;
+            if (type === '弹出窗口') {
+                const t = module.dataset.windowTitle || '提示';
+                const c = module.dataset.windowContent || '';
+                const btnText = module.dataset.windowButtonText || '确定';
+                const baType = module.dataset.windowButtonEventType || '';
+                const baData = module.dataset.windowButtonEventData || '';
+                showPclDialog(t, c, btnText, baType ? { type: baType, data: baData } : null);
+            } else if (type === '打开网页') {
+                let url = (module.dataset.eventData || '').trim();
+                if (!url) return;
+                if (!/^[a-z][a-z0-9+\-.]*:/i.test(url)) url = 'https://' + url;
+                window.open(url, '_blank');
+                showToast('已打开: ' + url, 'success');
+            } else {
+                executeEvent(type, module.dataset.eventData || '');
+            }
+        });
+
+        function autoArrange() {
+            if (isPreviewMode()) { showToast('预览模式下不可整理', 'warning'); return; }
+            const tops = getOrderedSiblings(moduleContainer);
+            if (tops.length === 0) { showToast('工作区为空', 'warning'); return; }
+            const containerWidth = moduleContainer.clientWidth;
+            const GAP = 20, PADDING = 20;
+            const MAX_ROW_WIDTH = containerWidth - PADDING * 2;
+            const items = tops.map(m => ({ el: m, w: m.offsetWidth, h: m.offsetHeight }));
+            let x = PADDING, y = PADDING, rowHeight = 0, totalHeight = PADDING;
+            items.forEach(item => {
+                if (item.w > MAX_ROW_WIDTH) {
+                    if (x > PADDING) { x = PADDING; y += rowHeight + GAP; rowHeight = 0; }
+                    item.el.style.left = x + 'px'; item.el.style.top = y + 'px';
+                    x = PADDING; y += item.h + GAP; rowHeight = 0; totalHeight = y;
+                    return;
+                }
+                if (x + item.w > PADDING + MAX_ROW_WIDTH && x > PADDING) {
+                    x = PADDING; y += rowHeight + GAP; rowHeight = 0;
+                }
+                item.el.style.left = x + 'px'; item.el.style.top = y + 'px';
+                x += item.w + GAP;
+                rowHeight = Math.max(rowHeight, item.h);
+                totalHeight = Math.max(totalHeight, y + item.h);
+            });
+            moduleContainer.style.minHeight = (totalHeight + PADDING) + 'px';
+            items.forEach(item => updateAttachedNotes(item.el));
+            redrawConnections();
+            showToast(`已整理 ${items.length} 个模块`, 'success');
+        }
+
+        btnTheme.addEventListener('click', () => {
+            document.body.classList.toggle('light-mode');
+            btnTheme.innerText = document.body.classList.contains('light-mode') ? '切换暗色' : '切换亮色';
+            setTimeout(redrawConnections, 50);
+        });
+        btnAbout.addEventListener('click', () => aboutModal.style.display = 'flex');
+        btnCloseAbout.addEventListener('click', () => aboutModal.style.display = 'none');
+        aboutModal.addEventListener('click', (e) => { if (e.target === aboutModal) aboutModal.style.display = 'none'; });
+
+        function updateEventDataLabel() {
+            const t = eventTypeSelect.value;
+            const map = {
+                '打开网页': ['事件数据 (网址)', '例如: https://www.bilibili.com/'],
+                '打开文件': ['事件数据 (文件路径)', '例如: notepad'],
+                '启动游戏': ['事件数据 (版本|服务器IP)', '例如: 1.16.3|mc.hypixel.net'],
+                '启动服务器': ['事件数据 (服务器IP)', '例如: mc.hypixel.net'],
+                '弹出窗口': ['事件数据', '']
+            };
+            const info = map[t] || ['事件数据', ''];
+            eventDataLabel.innerText = info[0];
+            eventDataHint.innerText = info[1];
+        }
+        function updatePanelVisibility() {
+            const t = eventTypeSelect.value;
+            if (t === '弹出窗口') {
+                eventDataGroup.style.display = 'none';
+                windowEditorPanel.style.display = 'block';
+                updateMiniPreview();
+            } else {
+                eventDataGroup.style.display = 'block';
+                windowEditorPanel.style.display = 'none';
+            }
+        }
+        function updateMiniPreview() {
+            const t = winTitleInput.value.trim() || '这是标题';
+            const c = (winContentInput.value || '').replace(/\\n/g, '\n');
+            const b = winBtnTextInput.value.trim() || '确定';
+            miniTitle.innerText = t;
+            miniContent.innerText = c || '（内容为空）';
+            miniBtn.innerText = b;
+        }
+        function updateWinBtnDataVisibility() {
+            const action = winBtnActionSelect.value;
+            if (action === '') { winBtnDataGroup.style.display = 'none'; }
+            else {
+                winBtnDataGroup.style.display = 'block';
+                if (action === '打开文件') { winBtnDataLabel.innerText = '文件路径'; winBtnDataInput.placeholder = 'notepad'; winBtnDataHint.innerText = '点击弹窗按钮后打开的文件'; }
+                else if (action === '弹出窗口') { winBtnDataLabel.innerText = '嵌套弹窗（标题|内容）'; winBtnDataInput.placeholder = '新窗口|这是嵌套弹窗的内容'; winBtnDataHint.innerText = '再次弹窗，用竖线分隔标题和内容'; }
+            }
+        }
+        eventTypeSelect.addEventListener('change', () => { updateEventDataLabel(); updatePanelVisibility(); });
+        winBtnActionSelect.addEventListener('change', updateWinBtnDataVisibility);
+        winTitleInput.addEventListener('input', updateMiniPreview);
+        winContentInput.addEventListener('input', updateMiniPreview);
+        winBtnTextInput.addEventListener('input', updateMiniPreview);
+
+        btnEditEvent.addEventListener('click', () => {
+            if (!selectedModule) return;
+            contextMenu.style.display = 'none';
+            const type = selectedModule.dataset.eventType || '打开网页';
+            eventTypeSelect.value = type;
+            eventDataInput.value = selectedModule.dataset.eventData || '';
+            eventTooltipInput.value = selectedModule.dataset.tooltip || '';
+            if (type === '弹出窗口') {
+                winTitleInput.value = selectedModule.dataset.windowTitle || '这是标题';
+                winContentInput.value = selectedModule.dataset.windowContent || '';
+                winBtnTextInput.value = selectedModule.dataset.windowButtonText || '确定';
+                winBtnActionSelect.value = selectedModule.dataset.windowButtonEventType || '';
+                winBtnDataInput.value = selectedModule.dataset.windowButtonEventData || '';
+                updateWinBtnDataVisibility();
+                updateMiniPreview();
+            } else {
+                winTitleInput.value = '这是标题';
+                winContentInput.value = '标题与内容以竖线间隔。\\n你也可以直接在其中换行。';
+                winBtnTextInput.value = '确定';
+                winBtnActionSelect.value = '';
+                winBtnDataInput.value = '';
+                updateWinBtnDataVisibility();
+                updateMiniPreview();
+            }
+            updateEventDataLabel();
+            updatePanelVisibility();
+            eventModal.style.display = 'flex';
+        });
+        btnCancelEvent.addEventListener('click', () => eventModal.style.display = 'none');
+
+        btnSaveEvent.addEventListener('click', () => {
+            if (!selectedModule) { eventModal.style.display = 'none'; return; }
+            const t = eventTypeSelect.value;
+            selectedModule.dataset.eventType = t;
+            selectedModule.dataset.tooltip = eventTooltipInput.value;
+            if (t === '弹出窗口') {
+                const wt = winTitleInput.value.trim() || '提示';
+                const wc = winContentInput.value;
+                const wb = winBtnTextInput.value.trim() || '确定';
+                const baType = winBtnActionSelect.value;
+                const baData = winBtnDataInput.value;
+                selectedModule.dataset.windowTitle = wt;
+                selectedModule.dataset.windowContent = wc;
+                selectedModule.dataset.windowButtonText = wb;
+                selectedModule.dataset.windowButtonEventType = baType;
+                selectedModule.dataset.windowButtonEventData = baData;
+                selectedModule.dataset.eventData = wt + '|' + wc;
+            } else {
+                selectedModule.dataset.eventData = eventDataInput.value;
+                delete selectedModule.dataset.windowTitle;
+                delete selectedModule.dataset.windowContent;
+                delete selectedModule.dataset.windowButtonText;
+                delete selectedModule.dataset.windowButtonEventType;
+                delete selectedModule.dataset.windowButtonEventData;
+            }
+            const tag = selectedModule.querySelector('.event-info-tag');
+            if (tag) {
+                let txt;
+                if (t === '弹出窗口') txt = `弹窗: ${selectedModule.dataset.windowTitle}`;
+                else txt = `${t}: ${selectedModule.dataset.eventData || '无'}`;
+                if (selectedModule.dataset.tooltip) txt += '  ⓘ';
+                tag.innerText = txt;
+            }
+            eventModal.style.display = 'none';
+        });
+
+        btnEditNote.addEventListener('click', () => {
+            if (!selectedModule || selectedModule.dataset.type !== 'Note') return;
+            contextMenu.style.display = 'none';
+            noteTextInput.value = selectedModule.dataset.text || '';
+            noteModal.style.display = 'flex';
+        });
+        btnCancelNote.addEventListener('click', () => noteModal.style.display = 'none');
+        btnSaveNote.addEventListener('click', () => {
+            if (selectedModule && selectedModule.dataset.type === 'Note') {
+                const t = noteTextInput.value;
+                selectedModule.dataset.text = t;
+                const el = selectedModule.querySelector('.pcl-note');
+                if (el) el.innerText = t;
+            }
+            noteModal.style.display = 'none';
+        });
+        document.addEventListener('dblclick', (e) => {
+            if (isPreviewMode()) return;
+            const n = e.target.closest('.placed-module[data-type="Note"]');
+            if (n) { selectModule(n); btnEditNote.click(); }
+        });
+
+        function startLeftDrag(item, clientX, clientY) {
+            if (isPreviewMode()) return;
+            dragSourceType = 'left';
+            draggedItem = item;
+            mouseDownX = clientX; mouseDownY = clientY;
+            isDragging = false;
+            const ghost = document.createElement('div');
+            ghost.style.left = clientX + 'px'; ghost.style.top = clientY + 'px';
+            ghost.style.display = 'none'; ghost.id = 'active-ghost';
+            ghost.className = 'drag-ghost';
+            ghost.innerText = item.dataset.text;
+            document.body.appendChild(ghost);
+        }
+        document.querySelectorAll('.module-item').forEach(item => {
+            item.addEventListener('mousedown', (e) => {
+                if (e.button !== 0 || isPreviewMode()) return;
+                e.preventDefault();
+                const p = getClientPos(e);
+                startLeftDrag(item, p.x, p.y);
+            });
+            item.addEventListener('touchstart', (e) => {
+                if (isPreviewMode()) return;
+                const p = getClientPos(e);
+                startLeftDrag(item, p.x, p.y);
+            }, { passive: true });
+        });
+
+        function initPlacedModule(div) {
+            const onStart = (clientX, clientY) => {
+                if (isPreviewMode()) return;
+                if (div.parentElement !== moduleContainer) {
+                    const wR = moduleContainer.getBoundingClientRect();
+                    const r = div.getBoundingClientRect();
+                    div.style.position = 'absolute';
+                    div.style.left = (r.left - wR.left) + 'px';
+                    div.style.top = (r.top - wR.top) + 'px';
+                    moduleContainer.appendChild(div);
+                    assignNewOrder(div, moduleContainer);
+                }
+                selectModule(div);
+                dragSourceType = 'right'; draggedItem = div;
+                mouseDownX = clientX; mouseDownY = clientY;
+                const r = div.getBoundingClientRect();
+                dragOffsetX = clientX - r.left;
+                dragOffsetY = clientY - r.top;
+                isDragging = false;
+            };
+            const shouldIgnore = (target) => {
+                return target.classList.contains('container-dropzone') ||
+                       (target.closest('.container-dropzone') !== null && !target.closest('.pcl-card-header'));
+            };
+            div.addEventListener('mousedown', (e) => {
+                if (e.button !== 0 || isPreviewMode()) return;
+                if (shouldIgnore(e.target)) return;
+                e.preventDefault();
+                onStart(e.clientX, e.clientY);
+            });
+            div.addEventListener('touchstart', (e) => {
+                if (isPreviewMode()) return;
+                if (shouldIgnore(e.target)) return;
+                const p = getClientPos(e);
+                longPressFired = false;
+                clearTimeout(longPressTimer);
+                longPressTimer = setTimeout(() => {
+                    if (!isDragging) {
+                        longPressFired = true;
+                        selectModule(div);
+                        showContextMenu(div, p.x, p.y);
+                        draggedItem = null; dragSourceType = null;
+                    }
+                }, LONG_PRESS_DURATION);
+                onStart(p.x, p.y);
+                if (longPressFired) { draggedItem = null; dragSourceType = null; }
+            }, { passive: true });
+            div.addEventListener('contextmenu', (e) => {
+                if (isPreviewMode()) return;
+                e.preventDefault(); e.stopPropagation();
+                selectModule(div);
+                showContextMenu(div, e.clientX, e.clientY);
+            });
+        }
+
+        function handlePointerMove(e) {
+            if (isPreviewMode()) return;
+            const p = getClientPos(e);
+            const clientX = p.x, clientY = p.y;
+            const dist = Math.sqrt((clientX - mouseDownX) ** 2 + (clientY - mouseDownY) ** 2);
+            if (dist > DRAG_THRESHOLD) clearTimeout(longPressTimer);
+            if (draggedItem && !isDragging && dist > DRAG_THRESHOLD) {
+                isDragging = true;
+                const ghost = document.getElementById('active-ghost');
+                if (ghost) ghost.style.display = 'block';
+                if (dragSourceType === 'right') { draggedItem.style.opacity = '0.6'; draggedItem.style.zIndex = '999'; }
+            }
+            if (!isDragging) return;
+            const ghost = document.getElementById('active-ghost');
+            if (ghost) { ghost.style.left = clientX + 'px'; ghost.style.top = clientY + 'px'; }
+
+            if (dragSourceType === 'right' && draggedItem && draggedItem.dataset.type === 'Note') {
+                document.querySelectorAll('.placed-module').forEach(m => m.classList.remove('note-snap-target'));
+                const result = findNearestEdge(draggedItem);
+                if (result) {
+                    result.target.classList.add('note-snap-target');
+                    const wR = moduleContainer.getBoundingClientRect();
+                    const tR = result.target.getBoundingClientRect();
+                    const relLeft = tR.left - wR.left, relTop = tR.top - wR.top;
+                    const w = draggedItem.offsetWidth, h = draggedItem.offsetHeight;
+                    let previewLeft, previewTop;
+                    if (result.edge === 'left') { previewLeft = relLeft - w - NOTE_EDGE_GAP; previewTop = relTop + (result.target.offsetHeight - h) / 2; }
+                    else if (result.edge === 'right') { previewLeft = relLeft + result.target.offsetWidth + NOTE_EDGE_GAP; previewTop = relTop + (result.target.offsetHeight - h) / 2; }
+                    else if (result.edge === 'top') { previewLeft = relLeft + (result.target.offsetWidth - w) / 2; previewTop = relTop - h - NOTE_EDGE_GAP; }
+                    else { previewLeft = relLeft + (result.target.offsetWidth - w) / 2; previewTop = relTop + result.target.offsetHeight + NOTE_EDGE_GAP; }
+                    notePreview.style.display = 'block';
+                    notePreview.style.left = previewLeft + 'px';
+                    notePreview.style.top = previewTop + 'px';
+                    notePreview.style.width = w + 'px';
+                    notePreview.style.height = h + 'px';
+                } else notePreview.style.display = 'none';
+            }
+
+            if (dragSourceType === 'right' && draggedItem) {
+                if (draggedItem.dataset.type === 'Note') {
+                    const wR = moduleContainer.getBoundingClientRect();
+                    let nL = clientX - wR.left - dragOffsetX;
+                    let nT = clientY - wR.top - dragOffsetY;
+                    if (nL < 0) nL = 0; if (nT < 0) nT = 0;
+                    if (draggedItem.parentElement === moduleContainer) {
+                        draggedItem.style.left = nL + 'px'; draggedItem.style.top = nT + 'px';
+                    }
+                    return;
+                }
+                draggedItem.style.pointerEvents = 'none';
+                const targetEl = document.elementFromPoint(clientX, clientY);
+                draggedItem.style.pointerEvents = '';
+                document.querySelectorAll('.container-dropzone').forEach(dz => dz.classList.remove('drag-over'));
+                if (targetEl) {
+                    const dz = targetEl.closest('.container-dropzone');
+                    if (dz && dz !== draggedItem.parentElement) dz.classList.add('drag-over');
+                }
+                const wR = moduleContainer.getBoundingClientRect();
+                let nL = clientX - wR.left - dragOffsetX;
+                let nT = clientY - wR.top - dragOffsetY;
+                const w = draggedItem.offsetWidth, h = draggedItem.offsetHeight;
+                const st = 8;
+                let snapXVal = null, bL = nL, mDX = st;
+                const sibs = Array.from(moduleContainer.children).filter(c => c !== draggedItem && c.classList.contains('placed-module') && c.parentElement === moduleContainer);
+                const tX = [];
+                sibs.forEach(el => { tX.push(el.offsetLeft, el.offsetLeft + el.offsetWidth, el.offsetLeft + el.offsetWidth / 2); });
+                tX.push(0, moduleContainer.clientWidth, moduleContainer.clientWidth / 2);
+                const cL = nL, cR = nL + w, cC = nL + w / 2;
+                tX.forEach(v => {
+                    if (Math.abs(cL - v) < mDX) { mDX = Math.abs(cL - v); bL = v; snapXVal = v; }
+                    if (Math.abs(cR - v) < mDX) { mDX = Math.abs(cR - v); bL = v - w; snapXVal = v; }
+                    if (Math.abs(cC - v) < mDX) { mDX = Math.abs(cC - v); bL = v - w / 2; snapXVal = v; }
+                });
+                if (snapXVal !== null) { nL = bL; snapLineY.style.display = 'block'; snapLineY.style.left = snapXVal + 'px'; }
+                else { nL = Math.round(nL / 20) * 20; snapLineY.style.display = 'none'; }
+                let snapYVal = null, bT = nT, mDY = st;
+                const tY = [];
+                sibs.forEach(el => { tY.push(el.offsetTop, el.offsetTop + el.offsetHeight, el.offsetTop + el.offsetHeight / 2); });
+                tY.push(0, moduleContainer.clientHeight, moduleContainer.clientHeight / 2);
+                const cT = nT, cB = nT + h, cCy = nT + h / 2;
+                tY.forEach(v => {
+                    if (Math.abs(cT - v) < mDY) { mDY = Math.abs(cT - v); bT = v; snapYVal = v; }
+                    if (Math.abs(cB - v) < mDY) { mDY = Math.abs(cB - v); bT = v - h; snapYVal = v; }
+                    if (Math.abs(cCy - v) < mDY) { mDY = Math.abs(cCy - v); bT = v - h / 2; snapYVal = v; }
+                });
+                if (snapYVal !== null) { nT = bT; snapLineX.style.display = 'block'; snapLineX.style.top = snapYVal + 'px'; }
+                else { nT = Math.round(nT / 20) * 20; snapLineX.style.display = 'none'; }
+                if (nL < 0) nL = 0; if (nT < 0) nT = 0;
+                if (draggedItem.parentElement === moduleContainer) {
+                    draggedItem.style.left = nL + 'px'; draggedItem.style.top = nT + 'px';
+                }
+                updateAttachedNotes(draggedItem);
+                requestAnimationFrame(redrawConnections);
+            }
+        }
+        document.addEventListener('mousemove', handlePointerMove);
+        document.addEventListener('touchmove', (e) => {
+            if (!draggedItem || longPressFired || isPreviewMode()) return;
+            const p = getClientPos(e);
+            const dist = Math.sqrt((p.x - mouseDownX) ** 2 + (p.y - mouseDownY) ** 2);
+            if (dist > DRAG_THRESHOLD || isDragging) { e.preventDefault(); handlePointerMove(e); }
+        }, { passive: false });
+
+        function handlePointerUp(e) {
+            if (isPreviewMode()) return;
+            clearTimeout(longPressTimer);
+            const p = getClientPos(e);
+            const clientX = p.x, clientY = p.y;
+            const ghost = document.getElementById('active-ghost');
+            document.querySelectorAll('.placed-module').forEach(m => m.classList.remove('note-snap-target'));
+            document.querySelectorAll('.container-dropzone').forEach(dz => dz.classList.remove('drag-over'));
+            hideSnapLines();
+            if (longPressFired) { cleanupDrag(ghost); longPressFired = false; return; }
+
+            if (draggedItem && isDragging) {
+                if (dragSourceType === 'left') {
+                    const target = document.elementFromPoint(clientX, clientY);
+                    if (target) {
+                        if (target.classList.contains('container-dropzone')) {
+                            const tm = target.closest('.placed-module');
+                            if (tm) {
+                                const d = draggedItem.dataset;
+                                const nm = createPlacedModule(d.type, d.xaml, d.text, d.source);
+                                nm.style.position = 'relative';
+                                target.appendChild(nm);
+                                assignNewOrder(nm, target);
+                                selectModule(nm);
+                                cleanupDrag(ghost);
+                                setTimeout(redrawConnections, 0);
+                                return;
+                            }
+                        }
+                        if (target === workspace || target === moduleContainer) {
+                            const d = draggedItem.dataset;
+                            const nm = createPlacedModule(d.type, d.xaml, d.text, d.source);
+                            const wR = moduleContainer.getBoundingClientRect();
+                            let nL = Math.round((clientX - wR.left - 60) / 20) * 20;
+                            let nT = Math.round((clientY - wR.top - 20) / 20) * 20;
+                            nm.style.left = (nL < 0 ? 0 : nL) + 'px';
+                            nm.style.top = (nT < 0 ? 0 : nT) + 'px';
+                            moduleContainer.appendChild(nm);
+                            assignNewOrder(nm, moduleContainer);
+                            selectModule(nm);
+                        } else {
+                            const tm = target.closest('.placed-module');
+                            if (tm && tm !== draggedItem) {
+                                const dz = tm.querySelector('.container-dropzone');
+                                if (dz) {
+                                    const d = draggedItem.dataset;
+                                    const nm = createPlacedModule(d.type, d.xaml, d.text, d.source);
+                                    nm.style.position = 'relative';
+                                    dz.appendChild(nm);
+                                    assignNewOrder(nm, dz);
+                                    selectModule(nm);
+                                }
+                            }
+                        }
+                    }
+                } else if (dragSourceType === 'right') {
+                    draggedItem.style.pointerEvents = 'none';
+                    const targetEl = document.elementFromPoint(clientX, clientY);
+                    draggedItem.style.pointerEvents = '';
+                    const dz = targetEl ? targetEl.closest('.container-dropzone') : null;
+                    if (dz) {
+                        draggedItem.style.position = 'relative';
+                        draggedItem.style.left = 'auto'; draggedItem.style.top = 'auto';
+                        dz.appendChild(draggedItem);
+                        assignNewOrder(draggedItem, dz);
+                        normalizeOrders(dz);
+                    } else if (targetEl === workspace || targetEl === moduleContainer) {
+                        if (draggedItem.parentElement !== moduleContainer) {
+                            moduleContainer.appendChild(draggedItem);
+                            draggedItem.style.position = 'absolute';
+                            assignNewOrder(draggedItem, moduleContainer);
+                        }
+                        if (draggedItem.dataset.type === 'Note') {
+                            normalizeOrders(moduleContainer);
+                            const edge = snapNoteToEdge(draggedItem);
+                            normalizeOrders(moduleContainer);
+                            if (edge) {
+                                const edgeNames = { left: '左侧', right: '右侧', top: '上方', bottom: '下方' };
+                                showToast(`备注已吸附到模块${edgeNames[edge]}`, 'success');
+                            }
+                        } else {
+                            normalizeOrdersByPosition(moduleContainer);
+                        }
+                    }
+                    Array.from(moduleContainer.children).forEach(m => {
+                        const innerDz = m.querySelector(':scope > .pcl-card > .pcl-card-body > .container-dropzone') ||
+                                        m.querySelector(':scope > .pcl-stackpanel > .container-dropzone');
+                        if (innerDz) {
+                            const notes = Array.from(innerDz.children).filter(c => c.dataset.type === 'Note');
+                            notes.forEach(n => { normalizeOrders(innerDz); snapNoteToEdge(n); });
+                            normalizeOrders(innerDz);
+                        }
+                    });
+                }
+            }
+            cleanupDrag(ghost);
+            setTimeout(redrawConnections, 0);
+        }
+        document.addEventListener('mouseup', handlePointerUp);
+        document.addEventListener('touchend', (e) => {
+            if (!draggedItem && !longPressFired) return;
+            handlePointerUp(e);
+        });
+        document.addEventListener('touchcancel', () => {
+            clearTimeout(longPressTimer);
+            cleanupDrag(document.getElementById('active-ghost'));
+            longPressFired = false;
+        });
+
+        function cleanupDrag(ghost) {
+            if (ghost) ghost.remove();
+            if (draggedItem && dragSourceType === 'right') { draggedItem.style.zIndex = ''; draggedItem.style.opacity = '1'; }
+            isDragging = false;
+            draggedItem = null;
+            dragSourceType = null;
+        }
+
+        function applyModuleColors(div) {
+            div.style.setProperty('--mod-bg', div.dataset.bgColor || DEFAULT_BG);
+            div.style.setProperty('--mod-fg', div.dataset.textColor || DEFAULT_FG);
+        }
+
+        function createPlacedModule(type, xamlTemplate, displayText, sourceUrl = '') {
+            const decodedXaml = decodeHtmlEntities(xamlTemplate);
+            const div = document.createElement('div');
+            div.className = 'placed-module';
+            div.dataset.type = type;
+            div.dataset.xaml = xamlTemplate;
+            div.dataset.text = displayText;
+            if (sourceUrl) div.dataset.source = sourceUrl;
+            div.dataset.bgColor = DEFAULT_BG;
+            div.dataset.textColor = DEFAULT_FG;
+            if (!div.dataset.uid) div.dataset.uid = genUid();
+            applyModuleColors(div);
+
+            if (type === 'Note') {
+                const note = document.createElement('div');
+                note.className = 'pcl-note';
+                note.innerText = displayText;
+                div.appendChild(note);
+                initPlacedModule(div);
+                return div;
+            }
+
+            const evTM = decodedXaml.match(/EventType="([^"]*)"/);
+            const evDM = decodedXaml.match(/EventData="([^"]*)"/);
+            const tipM = decodedXaml.match(/ToolTip="([^"]*)"/);
+            if (evTM) div.dataset.eventType = evTM[1];
+            if (evDM) div.dataset.eventData = evDM[1];
+            if (tipM) div.dataset.tooltip = tipM[1];
+
+            if (div.dataset.eventType === '弹出窗口' && div.dataset.eventData) {
+                const parts = div.dataset.eventData.split('|');
+                div.dataset.windowTitle = parts[0] || '提示';
+                div.dataset.windowContent = parts.slice(1).join('|') || '';
+                div.dataset.windowButtonText = '确定';
+            }
+
+            const textMatch = decodedXaml.match(/Text="([^"]*)"/) || decodedXaml.match(/Title="([^"]*)"/);
+            const visualText = textMatch ? textMatch[1] : displayText;
+
+            if (type === 'MyCard') {
+                const card = document.createElement('div');
+                card.className = 'pcl-card';
+                const header = document.createElement('div');
+                header.className = 'pcl-card-header';
+                const titleSpan = document.createElement('span');
+                titleSpan.innerText = visualText || '新卡片';
+                header.appendChild(titleSpan);
+                const swapBtn = document.createElement('span');
+                swapBtn.className = 'swap-btn';
+                swapBtn.innerText = '▲';
+                header.appendChild(swapBtn);
+                const body = document.createElement('div');
+                body.className = 'pcl-card-body';
+                const dz = document.createElement('div');
+                dz.className = 'container-dropzone';
+                body.appendChild(dz);
+                card.appendChild(header); card.appendChild(body);
+                swapBtn.onclick = (ev) => {
+                    ev.stopPropagation();
+                    body.classList.toggle('collapsed');
+                    swapBtn.innerText = body.classList.contains('collapsed') ? '▼' : '▲';
+                    setTimeout(redrawConnections, 0);
+                };
+                div.appendChild(card);
+            } else if (type === 'StackPanel' || type === 'StackPanelV') {
+                const sp = document.createElement('div');
+                sp.className = 'pcl-stackpanel ' + (type === 'StackPanel' ? 'horizontal' : 'vertical');
+                const dz = document.createElement('div');
+                dz.className = 'container-dropzone';
+                dz.style.flex = '1';
+                if (type === 'StackPanel') dz.style.flexDirection = 'row';
+                sp.appendChild(dz);
+                div.appendChild(sp);
+            } else if (type === 'MyButton') {
+                const btn = document.createElement('div');
+                const colorMatch = decodedXaml.match(/ColorType="([^"]*)"/);
+                let colorClass = 'highlight';
+                if (colorMatch) {
+                    if (colorMatch[1] === 'Red') colorClass = 'red';
+                    else if (colorMatch[1] === 'Highlight') colorClass = 'highlight';
+                }
+                if (!colorMatch) colorClass = '';
+                btn.className = 'pcl-button' + (colorClass ? ' ' + colorClass : '');
+                btn.innerText = visualText;
+                div.appendChild(btn);
+                if (div.dataset.eventType) {
+                    const tag = document.createElement('div');
+                    tag.className = 'event-info-tag';
+                    let txt;
+                    if (div.dataset.eventType === '弹出窗口' && div.dataset.windowTitle) txt = `弹窗: ${div.dataset.windowTitle}`;
+                    else txt = `${div.dataset.eventType}: ${div.dataset.eventData || '无'}`;
+                    if (div.dataset.tooltip) txt += '  ⓘ';
+                    tag.innerText = txt;
+                    div.appendChild(tag);
+                }
+            } else if (type === 'MyHint') {
+                const hint = document.createElement('div');
+                const tm = decodedXaml.match(/Theme="([^"]*)"/);
+                hint.className = 'pcl-hint ' + (tm ? tm[1].toLowerCase() : 'blue');
+                hint.innerText = visualText;
+                div.appendChild(hint);
+            } else if (type === 'MyListItem') {
+                const item = document.createElement('div');
+                item.className = 'pcl-listitem';
+                const logo = document.createElement('div');
+                logo.className = 'item-logo';
+                const lm = decodedXaml.match(/Logo="([^"]*)"/);
+                if (lm && lm[1]) {
+                    if (lm[1].startsWith('pack://')) logo.innerText = 'IMG';
+                    else logo.style.backgroundImage = `url('${lm[1]}')`;
+                } else logo.innerText = 'L';
+                item.appendChild(logo);
+                const info = document.createElement('div');
+                info.className = 'item-info';
+                const title = document.createElement('div');
+                title.className = 'item-title';
+                title.innerText = visualText;
+                info.appendChild(title);
+                const im = decodedXaml.match(/Info="([^"]*)"/);
+                if (im && im[1]) {
+                    const sub = document.createElement('div');
+                    sub.className = 'item-subtitle';
+                    sub.innerText = im[1];
+                    info.appendChild(sub);
+                }
+                item.appendChild(info);
+                div.appendChild(item);
+                if (div.dataset.eventType) {
+                    const tag = document.createElement('div');
+                    tag.className = 'event-info-tag';
+                    let txt;
+                    if (div.dataset.eventType === '弹出窗口' && div.dataset.windowTitle) txt = `弹窗: ${div.dataset.windowTitle}`;
+                    else txt = `${div.dataset.eventType}: ${div.dataset.eventData || '无'}`;
+                    if (div.dataset.tooltip) txt += '  ⓘ';
+                    tag.innerText = txt;
+                    div.appendChild(tag);
+                }
+            } else if (type === 'MyImage') {
+                const sm = decodedXaml.match(/Source="([^"]*)"/);
+                const imgUrl = sourceUrl || (sm ? sm[1] : 'https://www.baidu.com/img/flexible/logo/pc/result.png');
+                div.dataset.customImgData = imgUrl;
+                const img = document.createElement('img');
+                img.className = 'pcl-image';
+                img.src = imgUrl;
+                img.onerror = () => { img.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23E8E8E8"/><text x="50" y="50" font-family="sans-serif" font-size="10" fill="%23888" text-anchor="middle" dominant-baseline="middle">加载失败</text></svg>'; };
+                div.appendChild(img);
+            } else {
+                const tb = document.createElement('div');
+                tb.className = 'pcl-textblock';
+                tb.innerText = visualText;
+                div.appendChild(tb);
+            }
+            initPlacedModule(div);
+            return div;
+        }
+
+        function selectModule(m) {
+            document.querySelectorAll('.placed-module').forEach(x => x.classList.remove('selected'));
+            m.classList.add('selected');
+            selectedModule = m;
+        }
+
+        function showContextMenu(module, x, y) {
+            selectedModule = module;
+            contextMenu.style.display = 'block';
+            if (module.dataset.type === 'MyImage') { btnUploadModuleImg.style.display = 'block'; btnEditEvent.style.display = 'none'; btnEditNote.style.display = 'none'; }
+            else if (module.dataset.type === 'MyButton' || module.dataset.type === 'MyListItem') { btnUploadModuleImg.style.display = 'none'; btnEditEvent.style.display = 'block'; btnEditNote.style.display = 'none'; }
+            else if (module.dataset.type === 'Note') { btnUploadModuleImg.style.display = 'none'; btnEditEvent.style.display = 'none'; btnEditNote.style.display = 'block'; }
+            else { btnUploadModuleImg.style.display = 'none'; btnEditEvent.style.display = 'none'; btnEditNote.style.display = 'none'; }
+
+            const bgOk = supportsBackground(module.dataset.type);
+            const fgOk = supportsForeground(module.dataset.type);
+            colorPickerBg.disabled = !bgOk;
+            colorPickerText.disabled = !fgOk;
+            colorPickerBg.parentElement.style.opacity = bgOk ? '1' : '0.4';
+            colorPickerText.parentElement.style.opacity = fgOk ? '1' : '0.4';
+
+            const r = contextMenu.getBoundingClientRect();
+            let mx = x, my = y;
+            if (mx + r.width > window.innerWidth) mx = window.innerWidth - r.width - 10;
+            if (my + r.height > window.innerHeight) my = window.innerHeight - r.height - 10;
+            if (mx < 5) mx = 5;
+            if (my < 5) my = 5;
+            contextMenu.style.left = mx + 'px'; contextMenu.style.top = my + 'px';
+            colorPickerBg.value = module.dataset.bgColor || DEFAULT_BG;
+            colorPickerText.value = module.dataset.textColor || DEFAULT_FG;
+        }
+
+        workspace.addEventListener('mousedown', (e) => {
+            if (isPreviewMode()) return;
+            if (e.target === workspace || e.target === moduleContainer || e.target === svgLayer || e.target.classList.contains('container-dropzone')) {
+                document.querySelectorAll('.placed-module').forEach(m => m.classList.remove('selected'));
+                selectedModule = null;
+                contextMenu.style.display = 'none';
+            }
+        });
+        workspace.addEventListener('touchstart', (e) => {
+            if (isPreviewMode()) return;
+            if (e.target === workspace || e.target === moduleContainer || e.target === svgLayer || e.target.classList.contains('container-dropzone')) {
+                document.querySelectorAll('.placed-module').forEach(m => m.classList.remove('selected'));
+                selectedModule = null;
+                contextMenu.style.display = 'none';
+            }
+        }, { passive: true });
+
+        document.addEventListener('mousedown', (e) => {
+            if (!contextMenu.contains(e.target) && !e.target.closest('.placed-module') &&
+                !eventModal.contains(e.target) && !noteModal.contains(e.target) && !aboutModal.contains(e.target) && !pclDialogOverlay.contains(e.target)) {
+                contextMenu.style.display = 'none';
+            }
+        });
+
+        colorPickerBg.addEventListener('input', (e) => { if (selectedModule) { selectedModule.dataset.bgColor = e.target.value.toUpperCase(); applyModuleColors(selectedModule); } });
+        colorPickerText.addEventListener('input', (e) => { if (selectedModule) { selectedModule.dataset.textColor = e.target.value.toUpperCase(); applyModuleColors(selectedModule); } });
+        btnResetBg.addEventListener('click', () => { if (selectedModule) { selectedModule.dataset.bgColor = DEFAULT_BG; colorPickerBg.value = DEFAULT_BG; applyModuleColors(selectedModule); } });
+        btnResetFg.addEventListener('click', () => { if (selectedModule) { selectedModule.dataset.textColor = DEFAULT_FG; colorPickerText.value = DEFAULT_FG; applyModuleColors(selectedModule); } });
+        btnDeleteModule.addEventListener('click', () => {
+            if (selectedModule) {
+                const uid = selectedModule.dataset.uid;
+                selectedModule.remove();
+                document.querySelectorAll(`.placed-module[data-type="Note"][data-attached-uid="${uid}"]`).forEach(n => n.remove());
+                selectedModule = null;
+                contextMenu.style.display = 'none';
+                setTimeout(redrawConnections, 0);
+            }
+        });
+        btnUploadModuleImg.addEventListener('click', () => { contextMenu.style.display = 'none'; moduleImgUpload.click(); });
+        moduleImgUpload.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file && selectedModule && selectedModule.dataset.type === 'MyImage') {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    const img = selectedModule.querySelector('.pcl-image');
+                    if (img) img.src = ev.target.result;
+                    selectedModule.dataset.customImgData = ev.target.result;
+                    moduleImgUpload.value = '';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function getChildModules(node) {
+            if (node.dataset.type === 'MyCard' || node.dataset.type === 'StackPanel' || node.dataset.type === 'StackPanelV') {
+                const dz = node.querySelector('.container-dropzone');
+                if (dz) return Array.from(dz.children).filter(c => c.classList.contains('placed-module'))
+                    .sort((a, b) => (parseInt(a.dataset.order) || 0) - (parseInt(b.dataset.order) || 0));
+            }
+            return [];
+        }
+
+        function generateXaml(node) {
+            if (node.nodeType !== 1) return '';
+            if (node.dataset.type === 'Note') return `<!-- ${escapeNote(node.dataset.text || '')} -->`;
+
+            const children = getChildModules(node);
+            let childXaml = '';
+            children.forEach(c => { childXaml += generateXaml(c) + '\n'; });
+
+            let tpl = node.dataset.xaml || '';
+
+            let finalText = node.dataset.text || '';
+            const te = node.querySelector('.pcl-textblock') ||
+                       node.querySelector('.pcl-button') ||
+                       node.querySelector('.pcl-listitem .item-title') ||
+                       node.querySelector('.pcl-card-header > span:first-child') ||
+                       node.querySelector('.pcl-hint');
+            if (te && te.innerText) finalText = te.innerText;
+            finalText = escapeXaml(finalText);
+
+            if (tpl.includes('%%TEXT%%')) tpl = safeReplace(tpl, /%%TEXT%%/g, finalText);
+            if (tpl.includes('%%CONTENT%%')) {
+                tpl = safeReplace(tpl, /%%CONTENT%%/g, childXaml.trim());
+                tpl = tpl.replace(/>\s+</g, '><');
+            }
+            if (node.dataset.type === 'MyImage' && node.dataset.customImgData) {
+                tpl = safeReplace(tpl, /Source="[^"]*"/, `Source="${node.dataset.customImgData}"`);
+            }
+            if (node.dataset.eventType) {
+                tpl = safeReplace(tpl, /EventType="[^"]*"/, `EventType="${escapeXaml(node.dataset.eventType)}"`);
+            }
+            if (node.dataset.eventType === '弹出窗口') {
+                const ed = (node.dataset.windowTitle || '提示') + '|' + (node.dataset.windowContent || '');
+                tpl = safeReplace(tpl, /EventData="[^"]*"/, `EventData="${escapeXaml(ed)}"`);
+            } else if (node.dataset.eventData) {
+                tpl = safeReplace(tpl, /EventData="[^"]*"/, `EventData="${escapeXaml(node.dataset.eventData)}"`);
+            }
+            if (node.dataset.tooltip) {
+                if (/ToolTip="[^"]*"/.test(tpl)) {
+                    tpl = safeReplace(tpl, /ToolTip="[^"]*"/, `ToolTip="${escapeXaml(node.dataset.tooltip)}"`);
+                } else {
+                    tpl = tpl.replace(/<([a-zA-Z][a-zA-Z0-9:]*)(\s|\/|>)/, (m, tag, sep) => `<${tag} ToolTip="${escapeXaml(node.dataset.tooltip)}"${sep}`);
+                }
+            }
+            if (!node.dataset.xaml.includes('%%TEXT%%')) {
+                if (node.dataset.type === 'MyButton' || node.dataset.type === 'TextBlock' || node.dataset.type === 'MyHint') {
+                    tpl = safeReplace(tpl, /Text="[^"]*"/, `Text="${finalText}"`);
+                } else if (node.dataset.type === 'MyListItem' || node.dataset.type === 'MyCard') {
+                    tpl = safeReplace(tpl, /Title="[^"]*"/, `Title="${finalText}"`);
+                }
+            }
+
+            tpl = tpl.replace(/\s+Background="[^"]*"/g, '').replace(/\s+Foreground="[^"]*"/g, '');
+            const bg = node.dataset.bgColor || DEFAULT_BG;
+            const fg = node.dataset.textColor || DEFAULT_FG;
+            if (supportsBackground(node.dataset.type)) {
+                tpl = tpl.replace(/<([a-zA-Z][a-zA-Z0-9:]*)(\s|\/|>)/, (m, tag, sep) => `<${tag} Background="${bg}"${sep}`);
+            }
+            if (supportsForeground(node.dataset.type)) {
+                tpl = tpl.replace(/<([a-zA-Z][a-zA-Z0-9:]*)(\s|\/|>)/, (m, tag, sep) => `<${tag} Foreground="${fg}"${sep}`);
+            }
+            return tpl;
+        }
+
+        function generateFullXaml() {
+            const tops = getOrderedSiblings(moduleContainer);
+            let out = '';
+            tops.forEach(m => { out += generateXaml(m) + '\n\n'; });
+            let final = out.trim();
+            if (final) {
+                final = final.replace(/&(?!(amp|lt|gt|quot|apos|#\d+|#x[0-9a-fA-F]+);)/g, '&amp;');
+                final = `<!-- 这是 PCL 的主页自定义文件。你可以通过修改这个文件来自定义 PCL 主页：添加文本、打开网页、启动游戏，等等。\n     如果你倒腾这个文件把 PCL 玩炸了，把这个文件直接删除就行了。 -->\n\n` + final;
+            }
+            return final;
+        }
+
+        document.getElementById('btn-arrange').addEventListener('click', autoArrange);
+
+        document.getElementById('btn-preset').addEventListener('click', () => {
+            if (moduleContainer.children.length > 0) { if (!confirm("加载预设将清空当前工作区，确定继续吗？")) return; }
+            moduleContainer.innerHTML = '';
+            moduleContainer.style.minHeight = '100%';
+            const cardXaml = `&lt;local:MyCard Title=&quot;%%TEXT%%&quot; Margin=&quot;0,0,0,15&quot; CanSwap=&quot;True&quot; IsSwapped=&quot;False&quot;&gt;&#xA;    &lt;StackPanel Margin=&quot;25,40,23,15&quot;&gt;&#xA;%%CONTENT%%&#xA;    &lt;/StackPanel&gt;&#xA;&lt;/local:MyCard&gt;`;
+            const card = createPlacedModule('MyCard', cardXaml, '欢迎来到 PCL2');
+            card.style.left = '40px'; card.style.top = '40px';
+            moduleContainer.appendChild(card); card.dataset.order = 0;
+            const dz = card.querySelector('.container-dropzone');
+            const textXaml = `&lt;TextBlock TextWrapping=&quot;Wrap&quot; Margin=&quot;0,0,0,4&quot; Text=&quot;%%TEXT%%&quot; /&gt;`;
+            const text = createPlacedModule('TextBlock', textXaml, '这是一个使用模块化编辑器生成的预设主页。');
+            text.style.position = 'relative'; dz.appendChild(text); text.dataset.order = 0;
+            const btnXaml = `&lt;local:MyButton Height=&quot;35&quot; HorizontalAlignment=&quot;Left&quot; Padding=&quot;20,0,20,0&quot; Text=&quot;%%TEXT%%&quot; EventType=&quot;打开网页&quot; EventData=&quot;https://www.bilibili.com/&quot; ToolTip=&quot;把鼠标停在这里别动…… 就能看到这句话！&quot; /&gt;`;
+            const btn = createPlacedModule('MyButton', btnXaml, '把鼠标停在这里别动……');
+            btn.style.position = 'relative'; dz.appendChild(btn); btn.dataset.order = 1;
+            const dlgXaml = `&lt;local:MyButton Height=&quot;35&quot; HorizontalAlignment=&quot;Left&quot; Padding=&quot;20,0,20,0&quot; Text=&quot;%%TEXT%%&quot; EventType=&quot;弹出窗口&quot; /&gt;`;
+            const dlg = createPlacedModule('MyButton', dlgXaml, '显示一个弹窗');
+            dlg.style.position = 'relative'; dz.appendChild(dlg); dlg.dataset.order = 2;
+            dlg.dataset.eventType = '弹出窗口';
+            dlg.dataset.windowTitle = '这是标题';
+            dlg.dataset.windowContent = '标题与内容以竖线间隔。\\n你也可以直接在其中换行。';
+            dlg.dataset.windowButtonText = '确定';
+            dlg.dataset.windowButtonEventType = '';
+            dlg.dataset.windowButtonEventData = '';
+            dlg.dataset.eventData = '这是标题|标题与内容以竖线间隔。\\n你也可以直接在其中换行。';
+            const dlgTag = dlg.querySelector('.event-info-tag');
+            if (dlgTag) dlgTag.innerText = '弹窗: 这是标题';
+
+            const listXaml = `&lt;local:MyListItem Margin=&quot;-5,2,-5,8&quot; Logo=&quot;https://www.baidu.com/favicon.ico&quot; Title=&quot;%%TEXT%%&quot; Info=&quot;百度一下，你就知道&quot; Type=&quot;Clickable&quot; EventType=&quot;打开网页&quot; EventData=&quot;https://www.baidu.com/&quot; /&gt;`;
+            const li = createPlacedModule('MyListItem', listXaml, '百度');
+            li.style.left = '40px'; li.style.top = '380px';
+            moduleContainer.appendChild(li); li.dataset.order = 1;
+            const nt = createPlacedModule('Note', '点击编辑备注', '点击编辑备注');
+            nt.style.left = '400px'; nt.style.top = '380px';
+            moduleContainer.appendChild(nt); nt.dataset.order = 2;
+            setTimeout(redrawConnections, 50);
+        });
+
+        document.getElementById('btn-preview').addEventListener('click', () => {
+            sourceTextarea.value = generateFullXaml() || "暂无模块内容。";
+            sourcePreview.style.display = sourcePreview.style.display === 'flex' ? 'none' : 'flex';
+        });
+
+        document.getElementById('btn-export').addEventListener('click', () => {
+            const x = generateFullXaml();
+            if (!x) { alert("修改区为空，请先拖拽模块！"); return; }
+            const blob = new Blob([x], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = 'Custom.xaml';
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+
+        workspace.addEventListener('dragover', (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; });
+        workspace.addEventListener('drop', (e) => {
+            e.preventDefault();
+            if (isPreviewMode()) return;
+            if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                const file = e.dataTransfer.files[0];
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    const content = ev.target.result;
+                    const parser = new DOMParser();
+                    const xmlDoc = parser.parseFromString(content, "text/xml");
+                    if (xmlDoc.getElementsByTagName("parsererror").length > 0) { fallbackImportFile(content, file.name, e); return; }
+                    const rootNodes = xmlDoc.documentElement.children;
+                    let n = 0;
+                    for (let i = 0; i < rootNodes.length; i++) {
+                        const node = rootNodes[i];
+                        const tagName = node.tagName;
+                        if (tagName.startsWith('local:My') || tagName === 'TextBlock' || tagName === 'StackPanel') {
+                            const title = node.getAttribute('Title') || node.getAttribute('Text') || '导入模块';
+                            const evT = node.getAttribute('EventType') || '';
+                            const evD = node.getAttribute('EventData') || '';
+                            const src = node.getAttribute('Source') || '';
+                            const tip = node.getAttribute('ToolTip') || '';
+                            const iBg = node.getAttribute('Background') || DEFAULT_BG;
+                            const iFg = node.getAttribute('Foreground') || DEFAULT_FG;
+                            let tpl = `<${tagName}`;
+                            for (let attr of node.attributes) {
+                                if (attr.name === 'Background' || attr.name === 'Foreground') continue;
+                                if (attr.name === 'Title' || attr.name === 'Text') tpl += ` ${attr.name}="%%TEXT%%"`;
+                                else if (attr.name === 'Source') tpl += ` Source="%%SOURCE%%"`;
+                                else tpl += ` ${attr.name}="${escapeXaml(attr.value)}"`;
+                            }
+                            if (tagName === 'local:MyCard' || tagName === 'StackPanel') tpl += `>\n%%CONTENT%%\n</${tagName}>`;
+                            else tpl += ` />`;
+                            const nm = createPlacedModule(tagName, tpl, title, src);
+                            if (evT) nm.dataset.eventType = evT;
+                            if (evD) nm.dataset.eventData = evD;
+                            if (tip) nm.dataset.tooltip = tip;
+                            if (evT === '弹出窗口' && evD) {
+                                const parts = evD.split('|');
+                                nm.dataset.windowTitle = parts[0] || '提示';
+                                nm.dataset.windowContent = parts.slice(1).join('|') || '';
+                                nm.dataset.windowButtonText = '确定';
+                                const tag = nm.querySelector('.event-info-tag');
+                                if (tag) tag.innerText = `弹窗: ${nm.dataset.windowTitle}`;
+                            }
+                            nm.dataset.bgColor = iBg; nm.dataset.textColor = iFg;
+                            applyModuleColors(nm);
+                            nm.style.left = (40 + n * 40) + 'px'; nm.style.top = (40 + n * 40) + 'px';
+                            moduleContainer.appendChild(nm);
+                            nm.dataset.order = n;
+                            n++;
+                        }
+                    }
+                    if (n === 0) fallbackImportFile(content, file.name, e);
+                    setTimeout(redrawConnections, 50);
+                };
+                reader.readAsText(file);
+            }
+        });
+
+        function fallbackImportFile(content, fileName, e) {
+            const wR = moduleContainer.getBoundingClientRect();
+            const nm = createPlacedModule('TextBlock', content, '导入文件: ' + fileName);
+            nm.style.left = (e.clientX - wR.left - 100) + 'px';
+            nm.style.top = (e.clientY - wR.top - 25) + 'px';
+            moduleContainer.appendChild(nm);
+            assignNewOrder(nm, moduleContainer);
+        }
+
+        window.addEventListener('resize', () => {
+            if (!isPreviewMode()) {
+                redrawConnections();
+                document.querySelectorAll('.placed-module').forEach(m => updateAttachedNotes(m));
+            }
+        });
+        window.addEventListener('orientationchange', () => setTimeout(redrawConnections, 200));
+        setTimeout(redrawConnections, 200);
+    </script>
+</body>
+</html>
