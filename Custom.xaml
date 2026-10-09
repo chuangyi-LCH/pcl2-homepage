@@ -35,7 +35,7 @@
                                     HorizontalAlignment="Stretch"
                                     Padding="14,0"
                                     ColorType="Highlight"
-                                    Text="trademc.cc 官网"
+                                    Text="TradeCraft NEXT"
                                     EventType="打开网页"
                                     EventData="https://trademc.cc/"
                                     ToolTip="将使用你的默认浏览器打开" />
@@ -43,7 +43,7 @@
                                Margin="0,8,0,0"
                                Foreground="#64748B"
                                FontSize="12"
-                               Text="派系 宣战 夺地 在一张会改写的版图上写下你的国...（服务器关于内容 由于PCL安全策略，无法在启动器内直接显示）" />
+                               Text="派系 宣战 夺地 在一张会改写的版图上写下你的国" />
                 </StackPanel>
             </Border>
 
@@ -135,28 +135,25 @@
             <!-- 下载卡片作者: Reverse | 链接: https://blog.c12th.cn/archives/34.html -->
             <local:MyCard Title="下载" Margin="0,0,0,15" CanSwap="True" IsSwaped="True">
                 <StackPanel Margin="25,40,23,15">
-                    <local:MyButton Height="42"
-                                    HorizontalAlignment="Stretch"
-                                    Padding="14,0"
-                                    ColorType="Highlight"
-                                    Text="下载官方内容"
-                                    EventType="打开网页"
-                                    EventData="https://trademc.cc/#download"
-                                    ToolTip="将使用你的默认浏览器打开" />
 
-                    <TextBlock TextWrapping="Wrap"
-                               Margin="0,8,0,0"
-                               Foreground="#64748B"
-                               FontSize="12"
-                               Text="下载整合包或专用模组" />
 
-                    <local:MyHint IsWarn="True"
-                                  Text="链接必须为以http://或https://开头的网址，部分网址可能无法下载" />
 
+<StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+    <local:MyButton Margin="0,0,10,0" Width="140" Height="35"
+        ColorType="Highlight"
+        Text="查看github上官方内容" EventType="打开网页" EventData="https://github.com/TradeMC-Studio/" />
+    <local:MyButton Margin="0,0,10,0" Width="140" Height="35"
+        Text="下载官方内容" EventType="打开网页" EventData="https://trademc.cc/#download" />
+</StackPanel>
+
+<local:MyHint IsWarn="True"
+
+ Text="链接必须为以http://或https://开头的网址，部分网址可能无法下载" />
                     <StackPanel Orientation="Horizontal" Height="50" Width="800">
                         <TextBlock Text="下载链接：" VerticalAlignment="Center" />
                         <local:MyTextBox Margin="3" Name="web" Height="30" Width="600" />
                     </StackPanel>
+ 
 
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                         <local:MyButton EventType="下载文件"
