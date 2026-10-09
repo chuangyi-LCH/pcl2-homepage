@@ -37,7 +37,7 @@
                                     ColorType="Highlight"
                                     Text="TradeCraft NEXT"
                                     EventType="打开网页"
-                                    EventData="https://trademc.cc/"
+                                    EventData="https://mc.trademc.cc/"
                                     ToolTip="将使用你的默认浏览器打开" />
                     <TextBlock TextWrapping="Wrap"
                                Margin="0,8,0,0"
@@ -87,8 +87,39 @@
                        FontSize="11"
                        HorizontalAlignment="Center"
                        Margin="0,0,0,16" />
+<local:MyCard Title="更新日志" Margin="0,0,0,15" CanSwap="True" IsSwaped="False">
+    <StackPanel Margin="25,40,23,15">
+        <TextBlock Text="最近更新内容" FontSize="14" Foreground="#888888" Margin="0,0,0,10"/>
+        
+        <local:MyListItem Title="26.09.25-01更新速递" 
+                          Info="
+1.定时修复在线玩家附近范围内生物AI
+2.拥有非空自定义名称的敌对生物不会被清理
+3.修复国库历史流水加载的异常数据兼容问题
+4.修复国库相关交易回滚和地标跨境费用结算的编译及一致性问题" 
+                          Margin="0,0,0,6"/>
+         <local:MyListItem Title="26.09.25-01更新速递（补充）" 
+                          Info="5.国库流水增加操作者、事项、金额、交易后余额
+6.统一国库收入、支出操作，避免余额变负或溢出
+7.修复国库异常收支的问题。" 
+                          Margin="0,0,0,6"/>
+        
 
-            <!-- 消息 -->
+        <local:MyListItem Title="26.8.31-01更新速递" 
+                          Info="1.更新了强化增益的计算
+2.修复了传送出现的一些问题。" 
+                          Margin="0,0,0,6"/>
+        
+        <local:MyListItem Title="26.8.18-01更新速递" 
+                          Info="1.制作了铁块电梯
+2.修复了从普通区块进入高级区块会再次显示国家名称的问题
+3.修复了已有国籍萌新发言前不会显示“[萌新]”头衔的问题。" 
+                          Margin="0,0,0,6"/>
+        
+    </StackPanel>
+</local:MyCard>
+            
+<!-- 消息 -->
             <local:MyCard Title="消息" Margin="0,0,0,15" CanSwap="True" IsSwaped="True">
                 <StackPanel Margin="25,40,23,15">
                     <Border Background="White"
@@ -143,7 +174,7 @@
         ColorType="Highlight"
         Text="查看github上官方内容" EventType="打开网页" EventData="https://github.com/TradeMC-Studio/" />
     <local:MyButton Margin="0,0,10,0" Width="140" Height="35"
-        Text="下载官方内容" EventType="打开网页" EventData="https://trademc.cc/#download" />
+        Text="下载官方内容" EventType="打开网页" EventData="https://mc.trademc.cc/#download" />
 </StackPanel>
 
 <local:MyHint IsWarn="True"
